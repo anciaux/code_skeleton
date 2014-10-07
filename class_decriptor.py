@@ -4,15 +4,25 @@ class Method:
         self.name = name
         self.args = dict()
         for k,v in args:
-            self.args[k] = v
+            self.args[v] = k
         self.ret = ret
         self.encapsulation = encapsulation
-        
+
+    def __str__(self):
+        sstr = self.encapsulation + " " + self.ret + " " + self.name + "("
+        pairs = list(self.args.iteritems())
+        for k,_type in pairs[:-1]:
+            sstr += _type + " " + k + ", "
+        sstr += _type + " " + k + ")"
+        return sstr
 class Member:
-    def __init__(self,name,type,encpsulation):
+    def __init__(self,name,_type,encapsulation):
         self.name = name
-        self.type = type
+        self.type = _type
         self.encapsulation = encapsulation
+
+    def __str__(self):
+        return self.encapsulation + " " + self.type + " " + self.name
 
 class ClassDescriptor:
 
@@ -26,15 +36,22 @@ class ClassDescriptor:
     def addMethod(self,name,args,ret,encapsulation):
         self.methods.append(Method(name,args,ret,encapsulation))
 
-    def addMember(self,name,type,encapsulation):
-        self.members.append(Member(name,type,encapsulation))
+    def addMember(self,name,_type,encapsulation):
+        self.members.append(Member(name,_type,encapsulation))
 
     def __str__(self):
-        return "Class " + self.name + "\nMethods: " + str(self.methods) + "\nMembers:" + str(self.members)        
-
+        sstr = "Class " + self.name + "\n"
+        sstr += "Methods:\n"
+        for m in self.methods:
+            sstr += str(m)
+        sstr += "\n"
+        sstr += "Members:\n"
+        for m in self.members:
+            sstr += str(m) + "\n"       
+        return sstr
         
 if __name__ == '__main__':
     my_class = ClassDescriptor('dummy')
-    print my_class
     my_class.addMethod('compute',[('int','arg1'),('double','arg2')],'bool','public')
+    my_class.addMember('res','double','private')
     print my_class
