@@ -1,15 +1,21 @@
 
 class Method:
-    def __init__(self,name,args,ret,encapsulation):
+    def __init__(self,name,args,ret,encapsulation,virtual):
         self.name = name
+        self.virtual = virtual
         self.args = dict()
         for k,v in args:
             self.args[v] = k
         self.ret = ret
         self.encapsulation = encapsulation
+        if self.encapsulation == '':
+            self.encapsulation = 'public'
 
     def __str__(self):
-        sstr = self.encapsulation + " " + self.ret + " " + self.name + "("
+        sstr = self.encapsulation + " "
+        if not self.virtual == '': sstr += self.virtual + " "
+
+        sstr += self.ret + " " + self.name + "("
         pairs = list(self.args.iteritems())
         for k,_type in pairs[:-1]:
             sstr += _type + " " + k + ", "
@@ -33,8 +39,8 @@ class ClassDescriptor:
         self.methods = []
 
     
-    def addMethod(self,name,args,ret,encapsulation):
-        self.methods.append(Method(name,args,ret,encapsulation))
+    def addMethod(self,name,args,ret,encapsulation,virtual):
+        self.methods.append(Method(name,args,ret,encapsulation,virtual))
 
     def addMember(self,name,_type,encapsulation):
         self.members.append(Member(name,_type,encapsulation))
@@ -43,7 +49,7 @@ class ClassDescriptor:
         sstr = "Class " + self.name + "\n"
         sstr += "Methods:\n"
         for m in self.methods:
-            sstr += str(m)
+            sstr += str(m) + "\n"
         sstr += "\n"
         sstr += "Members:\n"
         for m in self.members:
