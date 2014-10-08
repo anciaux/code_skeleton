@@ -2,12 +2,20 @@ import re
 from class_decriptor import ClassDescriptor
 
 class ClassReader:
-    
+
+    def __init__(self):
+        self.classes = []
+        self.current_class = None
+
     def read(self,filename):
         f = open(filename,'r')
         for line in f:
             self.readline(line)
 
+        if self.current_class is not None:
+            self.classes.append(self.current_class)
+        
+        return self.classes
 
 
     def readline(self,line):
@@ -22,8 +30,9 @@ class ClassReader:
     def isNewClassTag(self,line):
         m = re.match(r'class (.*)',line)
         if m: 
-            print line
             name = m.group(1)
+            if self.current_class is not None:
+                self.classes.append(self.current_class)
             self.current_class = ClassDescriptor(name)
             return True
         return False
@@ -35,14 +44,12 @@ class ClassReader:
             _type         = m.group(2)
             name          = m.group(3)
             self.current_class.addMember(name,_type,encapsulation)
-            print self.current_class
             return True
         return False
 
     def isNewMethodTag(self,line):
         m = re.match(r'((?:public|protected|private)*)\s+((?:virtual|pure virtual)*)\s+(\S*)\s+(\S*)\((.*)\)',line)
         if m: 
-            print m.groups()
             encapsulation = m.group(1).strip()
             virtual       = m.group(2).strip()
             ret           = m.group(3).strip()
@@ -50,7 +57,6 @@ class ClassReader:
             args          = m.group(5).strip().split(',')
             args = [tuple(e.strip().split(' ')) for e in args]
             self.current_class.addMethod(name,args,ret,encapsulation,virtual)            
-            print self.current_class
             return True
         return False
 
@@ -59,4 +65,5 @@ class ClassReader:
 if __name__ == '__main__':
     cls_reader = ClassReader()
     classes = cls_reader.read('test.classes')
-    print classes
+    for c in classes:
+        print c
