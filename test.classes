@@ -1,6 +1,6 @@
 class Series
       public pure virtual void compute(int arg1, double arg2)
-      public void compute(double arg1, bool arg2)
+      public static void compute(double arg1, bool arg2)
       private float * res
 
 class AlgebraicSeries(Series)

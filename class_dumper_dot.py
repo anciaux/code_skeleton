@@ -101,7 +101,13 @@ node [fontname="Helvetica",fontsize="10",shape=record];
     def formatMethod(self,c,m):
         arg_types = list(m.args.iteritems())
         arg_types = [a for b,a in arg_types]
-        return m.ret + " " + m.name + "(" + ",".join(arg_types) + ")"
+        sstr = ""
+        if m.static: sstr += m.static + " "
+            
+        sstr += m.ret + " " + m.name + "(" + ",".join(arg_types) + ")"
+        if m.virtual == 'pure virtual': sstr += "=0"
+
+        return sstr
 
     def formatMember(self,c,m):
         return m.type + " " + m.name

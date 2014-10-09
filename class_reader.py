@@ -56,7 +56,10 @@ class ClassReader:
         return True
 
     def isNewMemberTag(self,line):
-        m = re.match(r'((?:public|protected|private)*)\s+((?:\S|(?:\s+\*))+)\s+(.*)',line)
+
+        if not line.find("(") == -1: return False
+        if not line.find(")") == -1: return False
+        m = re.match(r'((?:public|protected|private)*)\s*((?:\S|(?:\s+\*))+)\s+(.*)',line)
         if m: 
             encapsulation = m.group(1)
             _type         = m.group(2)
@@ -66,15 +69,16 @@ class ClassReader:
         return False
 
     def isNewMethodTag(self,line):
-        m = re.match(r'((?:public|protected|private)*)\s*((?:virtual|pure virtual)?)\s*(\S*)\s+(\S*)\((.*)\)',line)
+        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:virtual|pure virtual)?)\s*(\S*)\s+(\S*)\((.*)\)',line)
         if m: 
             encapsulation = m.group(1).strip()
-            virtual       = m.group(2).strip()
-            ret           = m.group(3).strip()
-            name          = m.group(4).strip()
-            args          = m.group(5).strip().split(',')
+            static        = m.group(2).strip()
+            virtual       = m.group(3).strip()
+            ret           = m.group(4).strip()
+            name          = m.group(5).strip()
+            args          = m.group(6).strip().split(',')
             args = [tuple(e.strip().split(' ')) for e in args]
-            self.current_class.addMethod(name,args,ret,encapsulation,virtual)            
+            self.current_class.addMethod(name,args,ret,encapsulation,virtual,static)            
             return True
         return False
 

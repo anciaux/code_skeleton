@@ -1,8 +1,9 @@
 
 class Method:
-    def __init__(self,name,args,ret,encapsulation,virtual):
+    def __init__(self,name,args,ret,encapsulation,virtual,static):
         self.name = name
         self.virtual = virtual
+        self.static = static
         self.args = dict()
         for k,v in args:
             self.args[v] = k
@@ -40,8 +41,8 @@ class ClassDescriptor:
         self.members = {'private':{},'public':{},'protected':{}}
         self.methods = {'private':{},'public':{},'protected':{}}
 
-    def addMethod(self,name,args,ret,encapsulation,virtual):
-        new_method = Method(name,args,ret,encapsulation,virtual)
+    def addMethod(self,name,args,ret,encapsulation,virtual,static):
+        new_method = Method(name,args,ret,encapsulation,virtual,static)
         if name not in self.methods[encapsulation]: self.methods[encapsulation][name] = []
         self.methods[encapsulation][name].append(new_method)
 
