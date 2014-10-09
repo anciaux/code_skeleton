@@ -5,25 +5,45 @@ class ClassDumperCPP(ClassDumper):
         ClassDumper.__init__(self)
 
 
-    def dumpFile(self,c):
-        sstr = "class " + c.name + "{\n"
-
-        sstr += self.formatConstructor(c)
+    def dumpHeader(self,c):
+        self.stage = 'header'
+        sstr =  self.formatClassDeclaration(c)
+        sstr += self.formatConstructors(c)
         sstr += self.formatMethods(c)
         sstr += self.formatMembers(c)
-        
         sstr += "};\n" 
         print sstr
 
-    def formatConstructor(self,c):
+    def dumpCCFile(self,c):
+        self.stage = 'CC'
+        sstr = self.formatConstructors(c)
+        sstr += self.formatMethods(c)
+        print sstr
+        
+    def dumpFile(self,c):
+        self.dumpHeader(c)
+        self.dumpCCFile(c)
+        
+    def formatClassDeclaration(self,c):
+        sstr = "class " + c.name
+
+        if c.inheritance is not None:
+            sstr += ": public " + ", public ".join(c.inheritance)
+            
+        sstr += "{\n"
+        return sstr
+
+
+        
+    def formatConstructors(self,c):
         sstr = ""
 
         for encaps in ['public','private', 'protected']:
             
             meths = c.getMethods(encaps)
             if c.name in meths:
-                sstr += encaps + ':'
-                sstr += str(meths[name])
+                if self.stage == 'header': sstr += encaps + ':\n\n'
+                sstr += self.formatMethod(meths[name])
         
 
         if not sstr == "":
@@ -46,14 +66,14 @@ class ClassDumperCPP(ClassDumper):
             meths_names = set(meths.keys()) - set(c.name)
             meths_names = list(meths_names)
             if len(meths_names) is not 0:
-                sstr += encaps + ':\n\n'
+                if self.stage == 'header': sstr += encaps + ':\n\n'
 
-            for n in meths_names:
-                for m in meths[n]:
-                    sstr += str(m) + "\n"
-            sstr += "\n"
+                for n in meths_names:
+                    for m in meths[n]:
+                        sstr += self.formatMethod(c,m)
+                sstr += "\n"
 
-        if not sstr == "":
+        if not sstr == "" and self.stage == 'header':
             sstr = """
   /* ------------------------------------------------------------------------ */
   /* Methods                                                                  */
@@ -71,13 +91,13 @@ class ClassDumperCPP(ClassDumper):
             
             membs = c.getMembers(encaps)
             if len(membs) is not 0:
-                sstr += encaps + ':\n\n'
+                if self.stage == 'header': sstr += encaps + ':\n\n'
 
-            for n,m in membs.iteritems():
-                sstr += str(m) + "\n"
-            sstr += "\n"
+                for n,m in membs.iteritems():
+                    sstr += self.formatMember(c,m)
+                sstr += "\n"
 
-        if not sstr == "":
+        if not sstr == "" and self.stage == 'header':
             sstr = """
   /* ------------------------------------------------------------------------ */
   /* Members                                                                  */
@@ -89,6 +109,35 @@ class ClassDumperCPP(ClassDumper):
 
 
 
+    def formatMethod(self,c,m):
+
+        sstr = ""
+        if self.stage == 'header':
+            sstr = "  "
+            if m.virtual in ['virtual','pure virtual']:
+                sstr += "virtual "
+            sstr += m.ret + " " + m.name + "("
+            sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
+            sstr +=  ");\n"
+
+        if self.stage == 'CC':
+            sstr = ""
+            sstr += m.ret + " " + c.name + "::" + m.name + "("
+            sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
+            sstr +=  "){\n\n}\n\n"
+            sstr += "\n"
+            sstr += """
+/* --------------------------------------------------------------------------- */
+
+"""
+
+            
+        return sstr
+
+    def formatMember(self,c,m):
+        sstr = "  " + m.type + " " + m.name + ";"
+        return sstr
+
 if __name__ == '__main__':
     dumper_class = ClassDumperCPP()
-    print dumper_class.dump('test.classes')
+    dumper_class.dump('test.classes')
