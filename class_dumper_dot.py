@@ -5,15 +5,19 @@ class ClassDumperDOT(ClassDumper):
         ClassDumper.__init__(self)
         self.encaps_symbol = {'public':'+','private':'-','protected':'#'} 
         
-    def dump(self,filename):
+    def dump(self,class_file,output_filename):
         sstr = 'digraph "test"\n{'
         sstr += """
 edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
 node [fontname="Helvetica",fontsize="10",shape=record];
 """
-        print sstr
-        ClassDumper.dump(self,filename)
-        print "}"
+
+        sstr += ClassDumper.dump(self,class_file)
+        sstr += "}"
+
+        with open(filename,'w') as f:
+            f.write(sstr)
+        
         
     def dumpFile(self,c):
         sstr =  self.formatClassDeclaration(c)
@@ -22,7 +26,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         sstr += self.formatMembers(c)
         sstr += '}"];\n'
         sstr += self.formatInheritance(c)
-        print sstr
+        return sstr
 
     def formatClassDeclaration(self,c):
         sstr = '"{0}" '.format(c.name)
@@ -106,6 +110,25 @@ node [fontname="Helvetica",fontsize="10",shape=record];
     def formatMember(self,c,m):
         return m.type + " " + m.name
 
+import argparse
+import subprocess
+    
 if __name__ == '__main__':
+
+    
+    parser = argparse.ArgumentParser(description='DOT graph producer for class representation')
+    parser.add_argument('--class_file','-c', help='The class file to process',required=True)
+    parser.add_argument('--format','-f' , default="pdf", help='The format of the produced graph file')
+    parser.add_argument('--output','-o' , help='The file to be produced',required=True)
+
+    args = parser.parse_args()
+    args = vars(args)
+    print args
     dumper_class = ClassDumperDOT()
-    dumper_class.dump('test.classes')
+    dumper_class.dump(args['class_file'],args['output'])
+    exe           = ['dot']
+    option_format = ['-T'+args['format'] ]
+    option_output = ['-o', args['output'] ]
+    option_input  = ['test.dot']
+    subprocess.call(exe+option_format+option_output+option_input)
+
