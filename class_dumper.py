@@ -8,8 +8,11 @@ class ClassDumper:
     def dump(self,filename):
         cls_reader = ClassReader()
         classes = cls_reader.read(filename)
+        sstr = ""
         for c in classes:
-            self.dumpFile(c)
+            sstr += self.dumpFile(c)
+
+        return sstr
 
     def dumpFile(self,c):
         raise Exception('pure virtual function')
