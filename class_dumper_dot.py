@@ -47,28 +47,21 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         
     def formatConstructors(self,c):
         sstr = ""
-
         for encaps in ['public','private', 'protected']:
             
             meths = c.getMethods(encaps)
             if c.name in meths:
+                if sstr == "":  sstr = "|"
                 sstr += self.encaps_symbol[encaps] + " "
                 sstr += self.formatMethod(meths[name])
         
-
-        if not sstr == "":
-            sstr = """
-  /* ------------------------------------------------------------------------ */
-  /* Constructors/Destructors                                                 */
-  /* ------------------------------------------------------------------------ */
-
-""" + sstr 
 
         return sstr
 
 
     def formatMethods(self,c):
-        sstr = "|"
+
+        sstr = ""
 
         for encaps in ['public','private', 'protected']:
             
@@ -79,6 +72,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
                 
                 for n in meths_names:
                     for m in meths[n]:
+                        if sstr == "":  sstr = "|"
                         sstr += self.encaps_symbol[encaps] + " "
                         sstr += self.formatMethod(c,m)
                         sstr += "\\l"
@@ -87,7 +81,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
 
     def formatMembers(self,c):
-        sstr = "|"
+        sstr = ""
 
         for encaps in ['public','private', 'protected']:
             
@@ -95,6 +89,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             if len(membs) is not 0:
                 
                 for n,m in membs.iteritems():
+                    if sstr == "":  sstr = "|"
                     sstr += self.encaps_symbol[encaps] + " "
                     sstr += self.formatMember(c,m)
                     sstr += "\\l"
