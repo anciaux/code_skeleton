@@ -12,13 +12,6 @@ class ClassDumperCPP(ClassDumper):
         sstr += self.formatMethods(c)
         sstr += self.formatMembers(c)
         
-#        sstr += "Methods:\n"
-#        for m in self.methods:
-#            sstr += str(m) + "\n"
-#        sstr += "\n"
-#        sstr += "Members:\n"
-#        for m in self.members:
-#            sstr += str(m) + "\n"      
         sstr += "};\n" 
         print sstr
 

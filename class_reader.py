@@ -9,8 +9,10 @@ class ClassReader:
 
     def read(self,filename):
         f = open(filename,'r')
+        self.line_cpt = 0
         for line in f:
             self.readline(line)
+            self.line_cpt += 1
 
         if self.current_class is not None:
             self.classes.append(self.current_class)
@@ -25,17 +27,33 @@ class ClassReader:
         if self.isNewClassTag(line): return
         if self.isNewMethodTag(line): return
         if self.isNewMemberTag(line): return
+        else: raise Exception("could not parse line:{0}\n'".format(self.line_cpt) + line + "'")
         
         
     def isNewClassTag(self,line):
-        m = re.match(r'class (.*)',line)
+        ret = False
+        m = re.match(r'class\s+(\S*)',line)
+        if m:
+            name        = m.group(1)
+            inheritance = None           
+            ret = True
+
+        m = re.match(r'class\s+(\S*)\((.*)\)',line)
         if m: 
-            name = m.group(1)
-            if self.current_class is not None:
+            name        = m.group(1)
+            inheritance = m.group(2)
+            inheritance = inheritance.strip().split(',')
+            inheritance = [e.strip() for e in inheritance] 
+            ret = True
+            
+        if ret == False: return False
+        
+        if self.current_class is not None:
                 self.classes.append(self.current_class)
-            self.current_class = ClassDescriptor(name)
-            return True
-        return False
+                
+        self.current_class = ClassDescriptor(name,inheritance)
+        
+        return True
 
     def isNewMemberTag(self,line):
         m = re.match(r'((?:public|protected|private)*)\s+((?:\S|(?:\s+\*))+)\s+(.*)',line)

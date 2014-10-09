@@ -34,8 +34,9 @@ class Member:
 class ClassDescriptor:
 
 
-    def __init__(self,name):
+    def __init__(self,name,inheritance=None):
         self.name = name 
+        self.inheritance = inheritance 
         self.members = {'private':{},'public':{},'protected':{}}
         self.methods = {'private':{},'public':{},'protected':{}}
 
@@ -56,6 +57,13 @@ class ClassDescriptor:
 
     def __str__(self):
         sstr = "Class " + self.name + "\n"
+        if (self.inheritance):
+            sstr += "Inherit: "
+            tmp = ""
+            for mother in self.inheritance:
+                tmp += mother + ","
+            sstr += tmp[:-1] + "\n"
+            
         sstr += "Methods:\n"
         for encaps,meths in self.methods.iteritems():
             sstr += encaps + ":\n"
