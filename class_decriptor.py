@@ -59,10 +59,7 @@ class ClassDescriptor:
         sstr = "Class " + self.name + "\n"
         if (self.inheritance):
             sstr += "Inherit: "
-            tmp = ""
-            for mother in self.inheritance:
-                tmp += mother + ","
-            sstr += tmp[:-1] + "\n"
+            sstr += ",".join(self.inheritance) + "\n"
             
         sstr += "Methods:\n"
         for encaps,meths in self.methods.iteritems():

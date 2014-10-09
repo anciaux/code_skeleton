@@ -3,5 +3,5 @@ class Series
       public  void compute(int arg1, double arg2)
       private float * res
 
-class AlgebraicSeries(Series)
+class AlgebraicSeries(Series,object)
       public void compute(int arg1, double arg2)
