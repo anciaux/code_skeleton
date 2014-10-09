@@ -120,7 +120,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args = vars(args)
-    print args
     dumper_class = ClassDumperDOT()
     dot_file = os.path.splitext(args['output'])[0] + ".dot"
 
