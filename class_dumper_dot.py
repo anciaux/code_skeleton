@@ -15,8 +15,9 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         sstr += ClassDumper.dump(self,class_file)
         sstr += "}"
 
-        with open(filename,'w') as f:
+        with open(output_filename,'w') as f:
             f.write(sstr)
+            f.close()
         
         
     def dumpFile(self,c):
@@ -112,6 +113,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
 import argparse
 import subprocess
+import os
     
 if __name__ == '__main__':
 
@@ -125,7 +127,9 @@ if __name__ == '__main__':
     args = vars(args)
     print args
     dumper_class = ClassDumperDOT()
-    dumper_class.dump(args['class_file'],args['output'])
+    dot_file = os.path.splitext(args['output'])[0] + ".dot"
+
+    dumper_class.dump(args['class_file'],dot_file)
     exe           = ['dot']
     option_format = ['-T'+args['format'] ]
     option_output = ['-o', args['output'] ]
