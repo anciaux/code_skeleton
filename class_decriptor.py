@@ -1,4 +1,10 @@
 
+class Typename:
+    def __init__(self,name,encapsulation):
+        self.name = name
+        self.encapsulation = encapsulation
+
+
 class Method:
     def __init__(self,name,args,ret,encapsulation,virtual,static):
         self.name = name
@@ -40,6 +46,7 @@ class ClassDescriptor:
         self.inheritance = inheritance 
         self.members = {'private':{},'public':{},'protected':{}}
         self.methods = {'private':{},'public':{},'protected':{}}
+        self.types   = {'private':{},'public':{},'protected':{}}
 
     def addMethod(self,name,args,ret,encapsulation,virtual,static):
         new_method = Method(name,args,ret,encapsulation,virtual,static)
@@ -50,8 +57,15 @@ class ClassDescriptor:
         new_member = Member(name,_type,encapsulation)
         self.members[encapsulation][name] = new_member
 
+    def addType(self,name,encapsulation):
+        new_type = Typename(name,encapsulation)
+        self.types[encapsulation][name] = new_type
+
     def getMembers(self,encapsulation=None):
         return self.members[encapsulation]
+
+    def getTypes(self,encapsulation=None):
+        return self.types[encapsulation]
 
     def getMethods(self,encapsulation=None):
         return self.methods[encapsulation]

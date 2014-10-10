@@ -26,6 +26,7 @@ class ClassReader:
         if line == "": return
         if self.isNewClassTag(line): return
         if self.isNewMethodTag(line): return
+        if self.isNewTypedef(line): return
         if self.isNewMemberTag(line): return
         else: raise Exception("could not parse line:{0}\n'".format(self.line_cpt) + line + "'")
         
@@ -59,12 +60,24 @@ class ClassReader:
 
         if not line.find("(") == -1: return False
         if not line.find(")") == -1: return False
-        m = re.match(r'((?:public|protected|private)*)\s*((?:\S|(?:\s+\*))+)\s+(.*)',line)
+        m = re.match(r'((?:public|protected|private)*)\s*((?:\S|(?:\s+\*)|(?:\s+\&))+)\s+(.*)',line)
         if m: 
             encapsulation = m.group(1)
             _type         = m.group(2)
             name          = m.group(3)
             self.current_class.addMember(name,_type,encapsulation)
+            return True
+        return False
+
+    def isNewTypedef(self,line):
+
+        if not line.find("(") == -1: return False
+        if not line.find(")") == -1: return False
+        m = re.match(r'((?:public|protected|private)*)\s*typedef\s*(\S+)',line)
+        if m: 
+            encapsulation = m.group(1)
+            name          = m.group(2)
+            self.current_class.addType(name,encapsulation)
             return True
         return False
 
