@@ -30,10 +30,11 @@ class Method:
         return sstr
 
 class Member:
-    def __init__(self,name,_type,encapsulation):
+    def __init__(self,name,_type,encapsulation,static):
         self.name = name
         self.type = _type
         self.encapsulation = encapsulation
+        self.static = static
 
     def __str__(self):
         return self.encapsulation + " " + self.type + " " + self.name
@@ -53,8 +54,8 @@ class ClassDescriptor:
         if name not in self.methods[encapsulation]: self.methods[encapsulation][name] = []
         self.methods[encapsulation][name].append(new_method)
 
-    def addMember(self,name,_type,encapsulation):
-        new_member = Member(name,_type,encapsulation)
+    def addMember(self,name,_type,encapsulation,static):
+        new_member = Member(name,_type,encapsulation,static)
         self.members[encapsulation][name] = new_member
 
     def addType(self,name,encapsulation):

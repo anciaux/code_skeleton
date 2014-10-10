@@ -6,7 +6,6 @@ class ClassDumperDOT(ClassDumper):
         self.encaps_symbol = {'public':'+','private':'-','protected':'#'} 
         self.base_types = ['int','double', 'float', 'unsigned int']
         self.base_types = self.base_types + [e + ' *' for e in self.base_types] + [e + ' &' for e in self.base_types]
-        print self.base_types
         
     def dump(self,class_file,output_filename):
         sstr = 'digraph "test"\n{'
@@ -109,17 +108,22 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         return sstr
 
     def formatCompositions(self,c):
-        sstr = ""
-
+        composition_set = set()
         for encaps in ['public','private', 'protected']:
             
             membs = c.getMembers(encaps)
             if len(membs) is not 0:
                 for n,m in membs.iteritems():
                     if m.type in self.base_types: continue
-                    sstr += '"{0}" '.format(m.type) + " -> " + '"{0}" '.format(c.name)
-                    sstr += '[style="dashed",color="midnightblue",fontname="Helvetica",arrowtail="odiamond",fontsize="10",dir="back"];\n'
+                    composition_set.add(m.type)
 
+
+        sstr = ""
+        for t in composition_set:
+            sstr += '"{0}" '.format(t) + " -> " + '"{0}" '.format(c.name)
+            sstr += '[style="dashed",color="midnightblue",fontname="Helvetica",arrowtail="odiamond",fontsize="10",dir="back"];\n'
+
+                
         return sstr
 
 
@@ -148,7 +152,9 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         return sstr
 
     def formatMember(self,c,m):
-        return m.type + " " + m.name
+        sstr = ""
+        if m.static == 'static': sstr += 'static '
+        return sstr + m.type + " " + m.name
 
 
 

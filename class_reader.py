@@ -41,8 +41,8 @@ class ClassReader:
 
         m = re.match(r'class\s+(\S*)\((.*)\)',line)
         if m: 
-            name        = m.group(1)
-            inheritance = m.group(2)
+            name        = m.group(1).strip()
+            inheritance = m.group(2).strip()
             inheritance = inheritance.strip().split(',')
             inheritance = [e.strip() for e in inheritance] 
             ret = True
@@ -60,12 +60,13 @@ class ClassReader:
 
         if not line.find("(") == -1: return False
         if not line.find(")") == -1: return False
-        m = re.match(r'((?:public|protected|private)*)\s*((?:\S|(?:\s+\*)|(?:\s+\&))+)\s+(.*)',line)
+        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:\S|(?:\s+\*)|(?:\s+\&))+)\s+(.*)',line)
         if m: 
-            encapsulation = m.group(1)
-            _type         = m.group(2)
-            name          = m.group(3)
-            self.current_class.addMember(name,_type,encapsulation)
+            encapsulation = m.group(1).strip()
+            static        = m.group(2).strip()
+            _type         = m.group(3).strip()
+            name          = m.group(3).strip()
+            self.current_class.addMember(name,_type,encapsulation,static)
             return True
         return False
 
@@ -75,14 +76,14 @@ class ClassReader:
         if not line.find(")") == -1: return False
         m = re.match(r'((?:public|protected|private)*)\s*typedef\s*(\S+)',line)
         if m: 
-            encapsulation = m.group(1)
-            name          = m.group(2)
+            encapsulation = m.group(1).strip()
+            name          = m.group(2).strip()
             self.current_class.addType(name,encapsulation)
             return True
         return False
 
     def isNewMethodTag(self,line):
-        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:virtual|pure virtual)?)\s*(\S*)\s+([\S|~]*)\((.*)\)',line)
+        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:virtual|pure virtual)?)\s*(.*)\s+([\S|~]*)\((.*)\)',line)
         if m: 
             encapsulation = m.group(1).strip()
             static        = m.group(2).strip()
