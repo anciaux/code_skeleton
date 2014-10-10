@@ -78,6 +78,7 @@ class ClassReader:
             name          = m.group(5).strip()
             args          = m.group(6).strip().split(',')
             args = [tuple(e.strip().split(' ')) for e in args]
+            args = [e for e in args if not e[0] == '']
             self.current_class.addMethod(name,args,ret,encapsulation,virtual,static)            
             return True
         return False

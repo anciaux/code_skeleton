@@ -53,7 +53,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             if c.name in meths:
                 if sstr == "":  sstr = "|"
                 sstr += self.encaps_symbol[encaps] + " "
-                sstr += self.formatMethod(meths[name])
+                sstr += self.formatMethod(c,meths[c.name])
         
 
         return sstr

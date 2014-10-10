@@ -1,7 +1,7 @@
 class Series
-      public pure virtual void compute(int arg1, double arg2)
-      public static void compute(double arg1, bool arg2)
-      private float * res
+  public Series();
+  public virtual ~Series();
+  public pure virtual Real compute(UInt N) = 0;
 
 class AlgebraicSeries(Series)
       public void compute(int arg1, double arg2)
