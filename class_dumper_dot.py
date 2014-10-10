@@ -53,8 +53,15 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             if c.name in meths:
                 if sstr == "":  sstr = "|"
                 sstr += self.encaps_symbol[encaps] + " "
-                sstr += self.formatMethod(c,meths[c.name])
-        
+                for cons in meths[c.name]:
+                    sstr += self.formatMethod(c,cons)
+                    sstr += "\\l"
+            if '~' + c.name in meths:
+                if sstr == "":  sstr = "|"
+                sstr += self.encaps_symbol[encaps] + " "
+                for cons in meths['~' + c.name]:
+                    sstr += self.formatMethod(c,cons)
+                    sstr += "\\l"
 
         return sstr
 
@@ -66,7 +73,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         for encaps in ['public','private', 'protected']:
             
             meths = c.getMethods(encaps)
-            meths_names = set(meths.keys()) - set(c.name)
+            meths_names = set(meths.keys()) - set([c.name,'~'+c.name])
             meths_names = list(meths_names)
             if len(meths_names) is not 0:
                 
@@ -103,8 +110,8 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         arg_types = [a for b,a in arg_types]
         sstr = ""
         if m.static: sstr += m.static + " "
-            
-        sstr += m.ret + " " + m.name + "(" + ",".join(arg_types) + ")"
+        if m.ret:    sstr += m.ret + " "
+        sstr += m.name + "(" + ",".join(arg_types) + ")"
         if m.virtual == 'pure virtual': sstr += "=0"
 
         return sstr

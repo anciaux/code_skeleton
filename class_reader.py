@@ -69,7 +69,7 @@ class ClassReader:
         return False
 
     def isNewMethodTag(self,line):
-        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:virtual|pure virtual)?)\s*(\S*)\s+(\S*)\((.*)\)',line)
+        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:virtual|pure virtual)?)\s*(\S*)\s+([\S|~]*)\((.*)\)',line)
         if m: 
             encapsulation = m.group(1).strip()
             static        = m.group(2).strip()

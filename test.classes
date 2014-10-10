@@ -1,7 +1,8 @@
 class Series
   public Series();
   public virtual ~Series();
-  public pure virtual Real compute(UInt N) = 0;
+  public virtual Real compute(UInt N) = 0;
+  public pure virtual Real computeItem(UInt N);
 
 class AlgebraicSeries(Series)
       public void compute(int arg1, double arg2)
