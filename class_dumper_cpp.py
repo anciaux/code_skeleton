@@ -16,7 +16,7 @@ class ClassDumperCPP(ClassDumper):
 
         return sstr
 
-    def makeHeaderFilename(self,class_name):
+    def makeBaseFilename(self,class_name):
         name = re.sub(r'([0-9]|[A-Z0-9])','_\g<1>',class_name)
         name = name.lower()
         
@@ -26,7 +26,7 @@ class ClassDumperCPP(ClassDumper):
         
     def dumpHeader(self,c):
 
-        basename = self.makeHeaderFilename(c.name)
+        basename = self.makeBaseFilename(c.name)
         header_filename = os.path.join(self.output_dir,basename+".hh")
 
         self.stage = 'header'
@@ -46,11 +46,21 @@ class ClassDumperCPP(ClassDumper):
             f.write("#endif //__" + basename.upper() + "__HH__\n")
 
     def dumpCCFile(self,c):
+
+        basename = self.makeBaseFilename(c.name)
+        CC_filename = os.path.join(self.output_dir,basename+".cc")
+        header_filename = os.path.join(self.output_dir,basename+".hh")
+
         self.stage = 'CC'
         sstr = self.formatConstructors(c)
         sstr += self.formatMethods(c)
-        print sstr
-        
+
+        with open(CC_filename,'w') as f:
+            print CC_filename
+            f.write("#include \"" + os.path.basename(header_filename) + "\"\n")
+            f.write("/* -------------------------------------------------------------------------- */\n\n")
+            f.write(sstr)
+
     def formatClassDeclaration(self,c):
         sstr = "class " + c.name
 
@@ -78,7 +88,7 @@ class ClassDumperCPP(ClassDumper):
                     sstr += self.formatMethod(c,m)
         
 
-        if not sstr == "": 
+        if not sstr == "" and self.stage == 'header': 
             sstr = """
   /* ------------------------------------------------------------------------ */
   /* Constructors/Destructors                                                 */
@@ -95,7 +105,7 @@ class ClassDumperCPP(ClassDumper):
         for encaps in ['public','private', 'protected']:
             
             meths = c.getMethods(encaps)
-            meths_names = set(meths.keys()) - set(c.name)
+            meths_names = set(meths.keys()) - set([c.name,'~'+c.name])
             meths_names = list(meths_names)
             if len(meths_names) is not 0:
                 if self.stage == 'header': sstr += encaps + ':\n\n'
