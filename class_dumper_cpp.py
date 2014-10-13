@@ -1,28 +1,55 @@
 from class_dumper import ClassDumper
+from class_reader import ClassReader
+import os, re 
 
 class ClassDumperCPP(ClassDumper):
-    def __init__(self):
+    def __init__(self,output_dir):
         ClassDumper.__init__(self)
+        self.output_dir = output_dir
+        
+    def dump(self,class_file):
+        cls_reader = ClassReader()
+        classes = cls_reader.read(class_file)
+        for c in classes:
+            self.dumpHeader(c)
+            self.dumpCCFile(c)
 
+        return sstr
 
+    def makeHeaderFilename(self,class_name):
+        name = re.sub(r'([0-9]|[A-Z0-9])','_\g<1>',class_name)
+        name = name.lower()
+        
+        if name[0] == '_':
+            name = name[1:]
+        return name
+        
     def dumpHeader(self,c):
+
+        basename = self.makeHeaderFilename(c.name)
+        header_filename = os.path.join(self.output_dir,basename+".hh")
+
         self.stage = 'header'
         sstr =  self.formatClassDeclaration(c)
         sstr += self.formatConstructors(c)
         sstr += self.formatMethods(c)
         sstr += self.formatMembers(c)
         sstr += "};\n" 
-        print sstr
+
+        with open(header_filename,'w') as f:
+            print header_filename
+            f.write("#ifndef __" + basename.upper() + "__HH__\n")
+            f.write("#define __" + basename.upper() + "__HH__\n\n")
+            f.write("/* -------------------------------------------------------------------------- */\n")
+            f.write(sstr)
+            f.write("\n/* -------------------------------------------------------------------------- */\n")
+            f.write("#endif //__" + basename.upper() + "__HH__\n")
 
     def dumpCCFile(self,c):
         self.stage = 'CC'
         sstr = self.formatConstructors(c)
         sstr += self.formatMethods(c)
         print sstr
-        
-    def dumpFile(self,c):
-        self.dumpHeader(c)
-        self.dumpCCFile(c)
         
     def formatClassDeclaration(self,c):
         sstr = "class " + c.name
@@ -43,10 +70,15 @@ class ClassDumperCPP(ClassDumper):
             meths = c.getMethods(encaps)
             if c.name in meths:
                 if self.stage == 'header': sstr += encaps + ':\n\n'
-                sstr += self.formatMethod(meths[name])
+                for m in meths[c.name]:
+                    sstr += self.formatMethod(c,m)
+            if '~' + c.name in meths:
+                if self.stage == 'header' and sstr == "": sstr += encaps + ':\n\n'
+                for m in meths['~' + c.name]:
+                    sstr += self.formatMethod(c,m)
         
 
-        if not sstr == "":
+        if not sstr == "": 
             sstr = """
   /* ------------------------------------------------------------------------ */
   /* Constructors/Destructors                                                 */
@@ -116,7 +148,8 @@ class ClassDumperCPP(ClassDumper):
             sstr = "  "
             if m.virtual in ['virtual','pure virtual']:
                 sstr += "virtual "
-            sstr += m.ret + " " + m.name + "("
+            if (not m.ret == ""): sstr += m.ret + " "
+            sstr += m.name + "("
             sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
             sstr +=  ");\n"
 
@@ -139,5 +172,5 @@ class ClassDumperCPP(ClassDumper):
         return sstr
 
 if __name__ == '__main__':
-    dumper_class = ClassDumperCPP()
+    dumper_class = ClassDumperCPP('/tmp')
     dumper_class.dump('test.classes')
