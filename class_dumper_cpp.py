@@ -235,6 +235,17 @@ int main(int argc, char ** argv){
         sstr = "  " + m.type + " " + m.name + ";"
         return sstr
 
+import argparse
+    
 if __name__ == '__main__':
-    dumper_class = ClassDumperCPP('/tmp')
-    dumper_class.dump('test.classes')
+
+    parser = argparse.ArgumentParser(description='CPP project producer for class representation')
+    parser.add_argument('--class_file','-c', help='The class file to process',required=True)
+    parser.add_argument('--output_dir','-o' , help='The directory where to put produced files',required=True)
+
+    args = parser.parse_args()
+    args = vars(args)
+    os.makedirs(args['output_dir'])
+    dumper_class = ClassDumperCPP(args['output_dir'])
+
+    dumper_class.dump(args['class_file'])
