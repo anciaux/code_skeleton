@@ -210,6 +210,8 @@ int main(int argc, char ** argv){
         sstr = ""
         if self.stage == 'header':
             sstr = "  "
+
+            if m.static: sstr += m.static + " "
             if m.virtual in ['virtual','pure virtual']:
                 sstr += "virtual "
             if (not m.ret == ""): sstr += m.ret + " "
@@ -236,7 +238,9 @@ int main(int argc, char ** argv){
         return sstr
 
     def formatMember(self,c,m):
-        sstr = "  " + m.type + " " + m.name + ";"
+        sstr = "   "
+        if m.static == 'static': sstr += 'static '
+        sstr += m.type + " " + m.name + ";"
         return sstr
 
 import argparse

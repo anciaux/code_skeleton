@@ -65,7 +65,7 @@ class ClassReader:
             encapsulation = m.group(1).strip()
             static        = m.group(2).strip()
             _type         = m.group(3).strip()
-            name          = m.group(3).strip()
+            name          = m.group(4).strip()
             self.current_class.addMember(name,_type,encapsulation,static)
             return True
         return False
