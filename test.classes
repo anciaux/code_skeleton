@@ -1,8 +1,34 @@
 class Series
   public Series();
   public virtual ~Series();
-  public virtual double compute(int N) = 0;
-  public pure virtual double computeItem(int N);
+  public virtual double compute(UInt N);
+  public virtual double getAnalyticPrediction();
+  protected void addTerm();
+  protected virtual double computeTerm(UInt k) = 0;
+  protected UInt current_term;
+  protected double current_value;
 
-class AlgebraicSeries(Series)
-      public void compute(int arg1, double arg2)
+
+class ComputeAlgebraic(Series)
+  public ComputeAlgebraic();
+  public virtual ~ComputeAlgebraic();
+  private  double getAnalyticPrediction();
+  private double computeTerm(UInt k);  
+
+
+class ComputePi(Series)
+  public ComputePi();
+  public virtual ~ComputePi();
+  public double compute(UInt N);
+  private  double getAnalyticPrediction();
+  private double computeTerm(UInt k);  
+  
+
+class DumperSeries
+  public DumperSeries(Series & series);
+  public virtual ~DumperSeries();
+  public virtual void dump(std::ostream & os)=0;
+  public void setPrecision(UInt precision);
+  protected Series & series
+  protected UInt precision
+
