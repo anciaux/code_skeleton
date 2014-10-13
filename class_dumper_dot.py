@@ -115,7 +115,10 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             if len(membs) is not 0:
                 for n,m in membs.iteritems():
                     if m.type in self.base_types: continue
-                    composition_set.add(m.type)
+                    temp_type = m.type
+                    temp_type = temp_type.replace('&','')
+                    temp_type = temp_type.strip()
+                    composition_set.add(temp_type)
 
 
         sstr = ""

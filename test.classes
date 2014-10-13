@@ -32,3 +32,11 @@ class DumperSeries
   protected Series & series
   protected UInt precision
 
+class ConvergenceSeries(DumperSeries)
+  public ConvergenceSeries(Series & series, UInt maxiter, UInt freq);
+  public virtual ~ConvergenceSeries();
+  public void dump(std::ostream & os = std::cout);
+  private UInt maxiter;
+  private UInt freq;
+
+
