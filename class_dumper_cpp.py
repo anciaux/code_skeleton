@@ -14,8 +14,55 @@ class ClassDumperCPP(ClassDumper):
             self.dumpHeader(c)
             self.dumpCCFile(c)
 
-        return sstr
+        self.dumpMakefile(classes)
 
+        return ""
+
+    def dumpMakefile(self,classes):
+        make_filename = os.path.join(self.output_dir,'Makefile')
+        CC_files     = [self.makeBaseFilename(c.name)+ ".cc" for c in classes]
+        obj_files    = [self.makeBaseFilename(c.name)+ ".o" for c in classes]
+        header_files = [self.makeBaseFilename(c.name)+ ".hh" for c in classes]
+        print CC_files
+        print header_files
+        sstr = """
+CXXFLAGS=-g -Wall
+CC_FILES     = {0}
+OBJ_FILES    = {1}
+HEADER_FILES = {2}
+
+EXEC=main
+
+$(EXEC): $(OBJ_FILES) main.o
+\tg++ -g $(OBJ_FILES) main.o -o $@
+
+.o: $(HEADER_FILES)
+\tg++ -c $(CXXFLAGS) $^ -o $@
+
+clean:
+\trm -f *.o *~ $(EXEC)
+
+""".format(" ".join(CC_files)," ".join(obj_files)," ".join(header_files))
+
+        with open(make_filename,'w') as f:
+            f.write(sstr)
+
+        main_filename   = os.path.join(self.output_dir,"main.cc")
+        with open(main_filename,'w') as f:
+            f.write("""
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+            
+int main(int argc, char ** argv){
+
+/// ... your code here ...
+
+  return EXIT_FAILURE;
+}""")
+        
+
+            
     def makeBaseFilename(self,class_name):
         name = re.sub(r'([0-9]|[A-Z0-9])','_\g<1>',class_name)
         name = name.lower()
@@ -28,7 +75,7 @@ class ClassDumperCPP(ClassDumper):
 
         basename = self.makeBaseFilename(c.name)
         header_filename = os.path.join(self.output_dir,basename+".hh")
-
+        
         self.stage = 'header'
         sstr =  self.formatClassDeclaration(c)
         sstr += self.formatConstructors(c)
@@ -41,9 +88,16 @@ class ClassDumperCPP(ClassDumper):
             f.write("#ifndef __" + basename.upper() + "__HH__\n")
             f.write("#define __" + basename.upper() + "__HH__\n\n")
             f.write("/* -------------------------------------------------------------------------- */\n")
+
+            if c.inheritance is not None:
+                for herit in c.inheritance:
+                    f.write("#include \"" + self.makeBaseFilename(herit) + ".hh\"\n")                
             f.write(sstr)
             f.write("\n/* -------------------------------------------------------------------------- */\n")
             f.write("#endif //__" + basename.upper() + "__HH__\n")
+
+
+            
 
     def dumpCCFile(self,c):
 
