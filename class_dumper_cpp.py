@@ -215,10 +215,14 @@ int main(int argc, char ** argv){
             if (not m.ret == ""): sstr += m.ret + " "
             sstr += m.name + "("
             sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
-            sstr +=  ");\n"
+            sstr +=  ")"
+            if m.virtual == 'pure virtual': sstr += "=0"
+            sstr += ";\n"
 
         if self.stage == 'CC':
             sstr = ""
+            if m.virtual == 'pure virtual': return ""
+
             sstr += m.ret + " " + c.name + "::" + m.name + "("
             sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
             sstr +=  "){\n\n}\n\n"
