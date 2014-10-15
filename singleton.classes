@@ -1,0 +1,6 @@
+class Singleton
+  public static Object & Instance();
+  private static Object obj
+
+
+

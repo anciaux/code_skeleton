@@ -1,8 +1,0 @@
-class Series
-  public Series();
-  public virtual ~Series();
-  public virtual double compute(int N) = 0;
-  public pure virtual double computeItem(int N);
-
-class AlgebraicSeries(Series)
-      public void compute(int arg1, double arg2)

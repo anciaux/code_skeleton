@@ -1,0 +1,12 @@
+class List
+  public int size()
+  public void add(Element e)
+  public remove(Element e)
+  public typedef ListIterator
+  public ListIterator begin()
+  public ListIterator end()
+
+
+class ListIterator
+  public Object & deReference()
+  public void increment()
