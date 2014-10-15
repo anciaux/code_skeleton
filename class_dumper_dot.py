@@ -4,8 +4,6 @@ class ClassDumperDOT(ClassDumper):
     def __init__(self):
         ClassDumper.__init__(self)
         self.encaps_symbol = {'public':'+','private':'-','protected':'#'} 
-        self.base_types = ['int','double', 'float', 'unsigned int']
-        self.base_types = self.base_types + [e + ' *' for e in self.base_types] + [e + ' &' for e in self.base_types]
         
     def dump(self,class_file,output_filename):
         sstr = 'digraph "test"\n{'
@@ -115,7 +113,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             if len(membs) is not 0:
                 for n,m in membs.iteritems():
                     if m.type in self.base_types: continue
-                    composition_set.add(m.type)
+                    composition_set.add(self.baseType(m.type))
 
 
         sstr = ""
@@ -180,17 +178,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DOT graph producer for class representation')
     parser.add_argument('--class_file','-c', help='The class file to process',required=True)
     parser.add_argument('--format','-f' , default="pdf", help='The format of the produced graph file')
-    parser.add_argument('--output','-o' , help='The file to be produced',required=True)
+    parser.add_argument('--output','-o' , help='The file to be produced')
 
     args = parser.parse_args()
     args = vars(args)
-    dumper_class = ClassDumperDOT()
-    dot_file = os.path.splitext(args['output'])[0] + ".dot"
+    if args["output"] is None:
+        args['output'] = os.path.splitext(args['class_file'])[0] + "." + args['format']
 
+    dumper_class = ClassDumperDOT()
+    dot_file = os.path.splitext(args['class_file'])[0] + ".dot"
     dumper_class.dump(args['class_file'],dot_file)
     exe           = ['dot']
     option_format = ['-T'+args['format'] ]
     option_output = ['-o', args['output'] ]
-    option_input  = ['test.dot']
+    option_input  = [dot_file]
     subprocess.call(exe+option_format+option_output+option_input)
 

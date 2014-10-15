@@ -23,8 +23,8 @@ class ClassDumperCPP(ClassDumper):
         CC_files     = [self.makeBaseFilename(c.name)+ ".cc" for c in classes]
         obj_files    = [self.makeBaseFilename(c.name)+ ".o" for c in classes]
         header_files = [self.makeBaseFilename(c.name)+ ".hh" for c in classes]
-        print CC_files
-        print header_files
+#        print CC_files
+#        print header_files
         sstr = """
 CXXFLAGS=-g -Wall
 CC_FILES     = {0}
@@ -84,7 +84,7 @@ int main(int argc, char ** argv){
         sstr += "};\n" 
 
         with open(header_filename,'w') as f:
-            print header_filename
+#            print header_filename
             f.write("#ifndef __" + basename.upper() + "__HH__\n")
             f.write("#define __" + basename.upper() + "__HH__\n\n")
             f.write("/* -------------------------------------------------------------------------- */\n")
@@ -92,6 +92,13 @@ int main(int argc, char ** argv){
             if c.inheritance is not None:
                 for herit in c.inheritance:
                     f.write("#include \"" + self.makeBaseFilename(herit) + ".hh\"\n")                
+
+#            if c.members is not None:
+#                for encaps,membs in c.members.iteritems():
+#                    for name,m in membs.iteritems():
+#                        if m.type in self.base_types: continue
+#                        f.write("#include \"" + self.makeBaseFilename(self.baseType(m.type)) + ".hh\"\n")                
+#
             f.write(sstr)
             f.write("\n/* -------------------------------------------------------------------------- */\n")
             f.write("#endif //__" + basename.upper() + "__HH__\n")
@@ -110,7 +117,7 @@ int main(int argc, char ** argv){
         sstr += self.formatMethods(c)
 
         with open(CC_filename,'w') as f:
-            print CC_filename
+#            print CC_filename
             f.write("#include \"" + os.path.basename(header_filename) + "\"\n")
             f.write("/* -------------------------------------------------------------------------- */\n\n")
             f.write(sstr)
@@ -238,9 +245,9 @@ int main(int argc, char ** argv){
         return sstr
 
     def formatMember(self,c,m):
-        sstr = "   "
+        sstr = "  "
         if m.static == 'static': sstr += 'static '
-        sstr += m.type + " " + m.name + ";"
+        sstr += m.type + " " + m.name + ";\n"
         return sstr
 
 import argparse
