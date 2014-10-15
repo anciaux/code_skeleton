@@ -115,7 +115,6 @@ node [fontname="Helvetica",fontsize="10",shape=record];
                     if m.type in self.base_types: continue
                     composition_set.add(self.baseType(m.type))
 
-
         sstr = ""
         for t in composition_set:
             sstr += '"{0}" '.format(t) + " -> " + '"{0}" '.format(c.name)
