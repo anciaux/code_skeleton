@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from class_dumper import ClassDumper
 from class_reader import ClassReader
 import os, re 

@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+
 from class_dumper import ClassDumper
 
 class ClassDumperDOT(ClassDumper):
