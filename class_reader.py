@@ -8,7 +8,8 @@ class ClassReader:
         self.current_class = None
 
     def read(self,filename):
-        f = open(filename,'r')
+        self.filename = filename
+        f = open(self.filename,'r')
         self.line_cpt = 0
         for line in f:
             self.readline(line)
@@ -23,12 +24,16 @@ class ClassReader:
     def readline(self,line):
         line = line.split('#')[0]
         line = line.strip()
+        print line
         if line == "": return
-        if self.isNewClassTag(line): return
-        if self.isNewMethodTag(line): return
-        if self.isNewTypedef(line): return
-        if self.isNewMemberTag(line): return
-        else: raise Exception("could not parse line:{0}\n'".format(self.line_cpt) + line + "'")
+        try:
+                if self.isNewClassTag(line): return
+                if self.isNewMethodTag(line): return
+                if self.isNewTypedef(line): return
+                if self.isNewMemberTag(line): return
+                else: raise Exception('Unknown tag')
+        except Exception as e:
+                raise Exception(self.filename + ":{0}".format(self.line_cpt+1) + ":'" + line + "' : " + str(e))
         
         
     def isNewClassTag(self,line):
@@ -96,7 +101,7 @@ class ClassReader:
             args = [list(e.strip().split(' ')) for e in args]
             temp_args = []
             for l in args:
-                if len(l) > 2: 
+                if len(l) >= 2: 
                     temp_args.append(tuple([" ".join(l[:-1]),l[-1]]))
             args = temp_args
             args = [e for e in args if not e[0] == '']
