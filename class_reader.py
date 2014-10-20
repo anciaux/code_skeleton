@@ -24,7 +24,6 @@ class ClassReader:
     def readline(self,line):
         line = line.split('#')[0]
         line = line.strip()
-        print line
         if line == "": return
         try:
                 if self.isNewClassTag(line): return
