@@ -22,5 +22,6 @@ class ClassDumper:
 
     def baseType(self,_type):
         temp_type = _type.replace('&','')
+        temp_type = _type.replace('*','')
         temp_type = temp_type.strip()
         return temp_type
