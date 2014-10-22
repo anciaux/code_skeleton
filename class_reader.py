@@ -64,14 +64,15 @@ class ClassReader:
 
         if not line.find("(") == -1: return False
         if not line.find(")") == -1: return False
-        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:\S|(?:\s+\*)|(?:\s+\&))+)\s+(.*)',line)
+        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:\S|(?:\s+\*)|(?:\s+\&))+)\s+(\S*)[\s|;]*(?://)*(.*)',line)
         if m: 
             encapsulation = m.group(1).strip()
             static        = m.group(2).strip()
             _type         = m.group(3).strip()
             name          = m.group(4).strip()
+            comments      = m.group(5).strip()
             name = name.replace(';','')
-            self.current_class.addMember(name,_type,encapsulation,static)
+            self.current_class.addMember(name,_type,encapsulation,static,comments)
             return True
         return False
 
@@ -89,7 +90,7 @@ class ClassReader:
         return False
 
     def isNewMethodTag(self,line):
-        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:virtual|pure virtual)?)\s*(.*)\s+([\S|~]*)\((.*)\)',line)
+        m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:virtual|pure virtual)?)\s*(.*)\s+([\S|~]*)\((.*)\)\s*((?:const)?)[\s|;]*(?://)*(.*)',line)
         if m: 
             encapsulation = m.group(1).strip()
             static        = m.group(2).strip()
@@ -97,6 +98,8 @@ class ClassReader:
             ret           = m.group(4).strip()
             name          = m.group(5).strip()
             args          = m.group(6).strip().split(',')
+            const         = m.group(7).strip()
+            comments      = m.group(8).strip()
             args = [list(e.strip().split(' ')) for e in args]
             temp_args = []
             for l in args:
@@ -104,7 +107,7 @@ class ClassReader:
                     temp_args.append(tuple([" ".join(l[:-1]),l[-1]]))
             args = temp_args
             args = [e for e in args if not e[0] == '']
-            self.current_class.addMethod(name,args,ret,encapsulation,virtual,static)            
+            self.current_class.addMethod(name,args,ret,encapsulation,virtual,static,const,comments)            
             return True
         return False
 

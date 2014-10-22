@@ -148,7 +148,6 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         if m.ret:    sstr += m.ret + " "
         sstr += m.name + "(" + ",".join(arg_types) + ")"
         if m.virtual == 'pure virtual': sstr += "=0"
-
         return sstr
 
     def formatMember(self,c,m):

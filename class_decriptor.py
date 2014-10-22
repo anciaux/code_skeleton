@@ -6,7 +6,7 @@ class Typename:
 
 
 class Method:
-    def __init__(self,name,args,ret,encapsulation,virtual,static):
+    def __init__(self,name,args,ret,encapsulation,virtual,static,const,comments):
         self.name = name
         self.virtual = virtual
         self.static = static
@@ -17,7 +17,9 @@ class Method:
         self.encapsulation = encapsulation
         if self.encapsulation == '':
             self.encapsulation = 'public'
-
+        self.comments = comments
+        self.const = const
+            
     def __str__(self):
         sstr = self.encapsulation + " "
         if not self.virtual == '': sstr += self.virtual + " "
@@ -30,11 +32,12 @@ class Method:
         return sstr
 
 class Member:
-    def __init__(self,name,_type,encapsulation,static):
+    def __init__(self,name,_type,encapsulation,static,comments):
         self.name = name
         self.type = _type
         self.encapsulation = encapsulation
         self.static = static
+        self.comments = comments
 
     def __str__(self):
         return self.encapsulation + " " + self.type + " " + self.name
@@ -49,13 +52,13 @@ class ClassDescriptor:
         self.methods = {'private':{},'public':{},'protected':{}}
         self.types   = {'private':{},'public':{},'protected':{}}
 
-    def addMethod(self,name,args,ret,encapsulation,virtual,static):
-        new_method = Method(name,args,ret,encapsulation,virtual,static)
+    def addMethod(self,name,args,ret,encapsulation,virtual,static,const,comments):
+        new_method = Method(name,args,ret,encapsulation,virtual,static,const,comments)
         if name not in self.methods[encapsulation]: self.methods[encapsulation][name] = []
         self.methods[encapsulation][name].append(new_method)
 
-    def addMember(self,name,_type,encapsulation,static):
-        new_member = Member(name,_type,encapsulation,static)
+    def addMember(self,name,_type,encapsulation,static,comments):
+        new_member = Member(name,_type,encapsulation,static,comments)
         self.members[encapsulation][name] = new_member
 
     def addType(self,name,encapsulation):
