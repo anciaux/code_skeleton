@@ -4,9 +4,11 @@
 from class_dumper import ClassDumper
 
 class ClassDumperDOT(ClassDumper):
-    def __init__(self):
+    def __init__(self,inheritance_flag=True, colaboration_flag=True):
         ClassDumper.__init__(self)
         self.encaps_symbol = {'public':'+','private':'-','protected':'#'} 
+        self.inheritance_flag  = inheritance_flag
+        self.colaboration_flag = colaboration_flag
         
     def dump(self,class_file,output_filename):
         sstr = 'digraph "test"\n{'
@@ -29,8 +31,9 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         sstr += self.formatMethods(c)
         sstr += self.formatMembers(c)
         sstr += '}"];\n'
-        sstr += self.formatInheritance(c)
-        sstr += self.formatCompositions(c)
+        if (self.inheritance_flag): sstr += self.formatInheritance(c)
+        if (self.colaboration_flag): sstr += self.formatCompositions(c)
+                
         sstr += self.formatTypes(c)
         return sstr
 
@@ -180,13 +183,22 @@ if __name__ == '__main__':
     parser.add_argument('--class_file','-c', help='The class file to process',required=True)
     parser.add_argument('--format','-f' , default="pdf", help='The format of the produced graph file')
     parser.add_argument('--output','-o' , help='The file to be produced')
-
+    parser.add_argument('--colaboration_no' , action='store_false', help='Disable the collaboration output')
+    parser.add_argument('--inheritance_no' , action='store_false', help='Disable the inheritance output')
+    
     args = parser.parse_args()
     args = vars(args)
     if args["output"] is None:
         args['output'] = os.path.splitext(args['class_file'])[0] + "." + args['format']
 
-    dumper_class = ClassDumperDOT()
+
+    inheritance_flag = True
+    colaboration_flag = True
+    if not args['inheritance_no'] : inheritance_flag = False
+    if not args['colaboration_no'] : colaboration_flag = False        
+
+    dumper_class = ClassDumperDOT(inheritance_flag, colaboration_flag)
+    
     dot_file = os.path.splitext(args['class_file'])[0] + ".dot"
     dumper_class.dump(args['class_file'],dot_file)
     exe           = ['dot']
