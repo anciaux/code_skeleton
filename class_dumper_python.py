@@ -4,7 +4,7 @@ from class_dumper import ClassDumper
 from class_reader import ClassReader
 import os, re 
 
-class ClassDumperCPP(ClassDumper):
+class ClassDumperPython(ClassDumper):
     def __init__(self,output_dir):
         ClassDumper.__init__(self)
         self.output_dir = output_dir
@@ -24,7 +24,7 @@ class ClassDumperCPP(ClassDumper):
         for c in classes:
             basename = self.makeBaseFilename(c.name)
             class_filename = os.path.join(self.output_dir,basename+".py")
-            with open(header_filename,'w') as f:
+            with open(class_filename,'w') as f:
                 self.dumpClass(c,f)
 
         return ""
@@ -36,7 +36,7 @@ class ClassDumperCPP(ClassDumper):
         sstr += self.formatConstructors(c)
         sstr += self.formatMethods(c)
         sstr += self.formatMembers(c)
-        sstr += "};\n" 
+        sstr += "\n" 
 
 
         f.write("## -------------------------------------------------------------------------- ##\n")
@@ -52,22 +52,21 @@ class ClassDumperCPP(ClassDumper):
 
             
 
-    def dumpCCFile(self,c):
-
-        basename = self.makeBaseFilename(c.name)
-        CC_filename = os.path.join(self.output_dir,basename+".cc")
-        header_filename = os.path.join(self.output_dir,basename+".hh")
-
-        self.stage = 'CC'
-        sstr = self.formatConstructors(c)
-        sstr += self.formatMethods(c)
-
-        with open(CC_filename,'w') as f:
-#            print CC_filename
-            f.write("#include \"" + os.path.basename(header_filename) + "\"\n")
-            f.write("/* -------------------------------------------------------------------------- */\n\n")
-            f.write(sstr)
-
+#    def dumpCCFile(self,c):
+#
+#        basename = self.makeBaseFilename(c.name)
+#        CC_filename = os.path.join(self.output_dir,basename+".cc")
+#        header_filename = os.path.join(self.output_dir,basename+".hh")
+#
+#        self.stage = 'CC'
+#        sstr = self.formatConstructors(c)
+#        sstr += self.formatMethods(c)
+#
+#        with open(CC_filename,'w') as f:
+#            f.write("#include \"" + os.path.basename(header_filename) + "\"\n")
+#            f.write("/* -------------------------------------------------------------------------- */\n\n")
+#            f.write(sstr)
+#
     def formatClassDeclaration(self,c):
         sstr = "class " + c.name
 
@@ -115,18 +114,17 @@ class ClassDumperCPP(ClassDumper):
             meths_names = set(meths.keys()) - set([c.name,'~'+c.name])
             meths_names = list(meths_names)
             if len(meths_names) is not 0:
-                if self.stage == 'header': sstr += encaps + ':\n\n'
 
                 for n in meths_names:
                     for m in meths[n]:
                         sstr += self.formatMethod(c,m)
                 sstr += "\n"
 
-        if not sstr == "" and self.stage == 'header':
+        if not sstr == "":
             sstr = """
-  /* ------------------------------------------------------------------------ */
-  /* Methods                                                                  */
-  /* ------------------------------------------------------------------------ */
+  ## ------------------------------------------------------------------------ ##
+  ## Methods                                                                  ##
+  ## ------------------------------------------------------------------------ ##
 
 """ + sstr
 
@@ -161,32 +159,17 @@ class ClassDumperCPP(ClassDumper):
     def formatMethod(self,c,m):
 
         sstr = ""
-        if self.stage == 'header':
-            sstr = "  "
-
-            if m.static: sstr += m.static + " "
-            if m.virtual in ['virtual','pure virtual']:
-                sstr += "virtual "
-            if (not m.ret == ""): sstr += m.ret + " "
-            sstr += m.name + "("
+        if m.static: raise
+        sstr += "def " + m.name + "("
             sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
             sstr +=  ")"
             if m.virtual == 'pure virtual': sstr += "=0"
             sstr += ";\n"
 
-        if self.stage == 'CC':
-            sstr = ""
-            if m.virtual == 'pure virtual': return ""
+        if m.virtual in ['virtual','pure virtual']:
+            sstr += "virtual "
 
-            sstr += m.ret + " " + c.name + "::" + m.name + "("
-            sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
-            sstr +=  "){\n\n}\n\n"
-            sstr += "\n"
-            sstr += """
-/* --------------------------------------------------------------------------- */
-
-"""
-
+            
             
         return sstr
 
@@ -207,6 +190,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args = vars(args)
     os.makedirs(args['output_dir'])
-    dumper_class = ClassDumperCPP(args['output_dir'])
+    dumper_class = ClassDumperPython(args['output_dir'])
 
     dumper_class.dump(args['class_file'])
