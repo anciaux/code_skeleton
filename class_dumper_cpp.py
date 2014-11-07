@@ -25,8 +25,6 @@ class ClassDumperCPP(ClassDumper):
         CC_files     = [self.makeBaseFilename(c.name)+ ".cc" for c in classes]
         obj_files    = [self.makeBaseFilename(c.name)+ ".o" for c in classes]
         header_files = [self.makeBaseFilename(c.name)+ ".hh" for c in classes]
-#        print CC_files
-#        print header_files
         sstr = """
 CXXFLAGS=-g -Wall
 CC_FILES     = {0}
@@ -125,7 +123,14 @@ int main(int argc, char ** argv){
             f.write(sstr)
 
     def formatClassDeclaration(self,c):
-        sstr = "class " + c.name
+        sstr = """
+/**
+  * Documentation TODO
+  */
+  
+"""
+  
+        sstr += "class " + c.name
 
         if c.inheritance is not None:
             sstr += ": public " + ", public ".join(c.inheritance)
@@ -216,9 +221,9 @@ int main(int argc, char ** argv){
 
     def formatMethod(self,c,m):
 
-        sstr = ""
         if self.stage == 'header':
-            sstr = "  "
+            sstr =  "  //! Documentation TODO\n"
+            sstr += "  "
 
             if m.static: sstr += m.static + " "
             if m.virtual in ['virtual','pure virtual']:
@@ -247,7 +252,8 @@ int main(int argc, char ** argv){
         return sstr
 
     def formatMember(self,c,m):
-        sstr = "  "
+        sstr = "  //!Documentation TODO\n"
+        sstr += "  "
         if m.static == 'static': sstr += 'static '
         sstr += m.type + " " + m.name + ";\n"
         return sstr
