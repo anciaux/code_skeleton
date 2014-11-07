@@ -44,7 +44,7 @@ Module containing class {0}
         self.incTabulation()
         sstr += """
 {0}\"\"\" 
-class {1}: TODO
+class {1}: Documentation TODO
 {0}\"\"\"
 """.format(self.getTabulation(),c.name)
 
@@ -175,7 +175,7 @@ class {1}: TODO
 
         sstr += """
 {0}\"\"\"
-{0} Method {1}: TODO
+{0}Documentation TODO
 {0}\"\"\"
 """.format(self.getTabulation(),name)
 
