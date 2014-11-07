@@ -8,7 +8,7 @@ class ClassDumperPython(ClassDumper):
     def __init__(self,output_dir):
         ClassDumper.__init__(self)
         self.output_dir = output_dir
-
+        self.nb_tabulation = 0
 
     def makeBaseFilename(self,class_name):
         name = re.sub(r'([0-9]|[A-Z0-9])','_\g<1>',class_name)
@@ -33,6 +33,7 @@ class ClassDumperPython(ClassDumper):
     def dumpClass(self,c,f):
 
         sstr =  self.formatClassDeclaration(c)
+        self.incTabulation()
         sstr += self.formatConstructors(c)
         sstr += self.formatMethods(c)
         sstr += self.formatMembers(c)
@@ -48,25 +49,6 @@ class ClassDumperPython(ClassDumper):
         f.write(sstr)
         f.write("## -------------------------------------------------------------------------- ##\n")
 
-
-
-            
-
-#    def dumpCCFile(self,c):
-#
-#        basename = self.makeBaseFilename(c.name)
-#        CC_filename = os.path.join(self.output_dir,basename+".cc")
-#        header_filename = os.path.join(self.output_dir,basename+".hh")
-#
-#        self.stage = 'CC'
-#        sstr = self.formatConstructors(c)
-#        sstr += self.formatMethods(c)
-#
-#        with open(CC_filename,'w') as f:
-#            f.write("#include \"" + os.path.basename(header_filename) + "\"\n")
-#            f.write("/* -------------------------------------------------------------------------- */\n\n")
-#            f.write(sstr)
-#
     def formatClassDeclaration(self,c):
         sstr = "class " + c.name
 
@@ -85,22 +67,20 @@ class ClassDumperPython(ClassDumper):
             
             meths = c.getMethods(encaps)
             if c.name in meths:
-                if self.stage == 'header': sstr += encaps + ':\n\n'
                 for m in meths[c.name]:
                     sstr += self.formatMethod(c,m)
             if '~' + c.name in meths:
-                if self.stage == 'header' and sstr == "": sstr += encaps + ':\n\n'
                 for m in meths['~' + c.name]:
                     sstr += self.formatMethod(c,m)
         
 
-        if not sstr == "" and self.stage == 'header': 
+        if not sstr == "": 
             sstr = """
-  /* ------------------------------------------------------------------------ */
-  /* Constructors/Destructors                                                 */
-  /* ------------------------------------------------------------------------ */
+{0}## ------------------------------------------------------------------ ##
+{0}## Constructors/Destructors                                           ##
+{0}## ------------------------------------------------------------------ ##
 
-""" + sstr 
+""".format(self.getTabulation()) + sstr 
 
         return sstr
 
@@ -118,15 +98,15 @@ class ClassDumperPython(ClassDumper):
                 for n in meths_names:
                     for m in meths[n]:
                         sstr += self.formatMethod(c,m)
-                sstr += "\n"
+                        sstr += "\n"
 
         if not sstr == "":
             sstr = """
-  ## ------------------------------------------------------------------------ ##
-  ## Methods                                                                  ##
-  ## ------------------------------------------------------------------------ ##
+{0}## ------------------------------------------------------------------ ##
+{0}## Methods                                                            ##
+{0}## ------------------------------------------------------------------ ##
 
-""" + sstr
+""".format(self.getTabulation()) + sstr
 
         return sstr
 
@@ -138,19 +118,17 @@ class ClassDumperPython(ClassDumper):
             
             membs = c.getMembers(encaps)
             if len(membs) is not 0:
-                if self.stage == 'header': sstr += encaps + ':\n\n'
-
                 for n,m in membs.iteritems():
                     sstr += self.formatMember(c,m)
                 sstr += "\n"
 
-        if not sstr == "" and self.stage == 'header':
+        if not sstr == "":
             sstr = """
-  /* ------------------------------------------------------------------------ */
-  /* Members                                                                  */
-  /* ------------------------------------------------------------------------ */
+{0}## ------------------------------------------------------------------ ##
+{0}## Members                                                            ##
+{0}## ------------------------------------------------------------------ ##
 
-""" + sstr
+""".format(self.getTabulation()) + sstr
 
         return sstr
 
@@ -160,16 +138,19 @@ class ClassDumperPython(ClassDumper):
 
         sstr = ""
         if m.static: raise
-        sstr += "def " + m.name + "("
-            sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
-            sstr +=  ")"
-            if m.virtual == 'pure virtual': sstr += "=0"
-            sstr += ";\n"
+        sstr += self.getTabulation() + "def " + m.name + "("
+        sstr += ", ".join([b for b,a in list(m.args.iteritems())])
+        sstr +=  "):\n"
 
-        if m.virtual in ['virtual','pure virtual']:
-            sstr += "virtual "
+        self.incTabulation()
+        
+        if m.virtual == 'pure virtual': 
+                sstr += self.getTabulation() + "raise Exception('This is a pure virtual method')\n"
 
-            
+
+        sstr += self.getTabulation() + "pass\n"
+
+        self.decTabulation()
             
         return sstr
 
@@ -179,6 +160,16 @@ class ClassDumperPython(ClassDumper):
         sstr += m.type + " " + m.name + ";\n"
         return sstr
 
+    def getTabulation(self):
+        return "\t" * self.nb_tabulation
+
+    def incTabulation(self):
+        self.nb_tabulation += 1
+
+    def decTabulation(self):
+        self.nb_tabulation -= 1
+
+        
 import argparse
     
 if __name__ == '__main__':

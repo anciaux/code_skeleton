@@ -4,7 +4,7 @@ class Series
   public virtual double compute(UInt N);
   public virtual double getAnalyticPrediction();
   protected void addTerm();
-  protected virtual double computeTerm(UInt k) = 0;
+  protected pure virtual double computeTerm(UInt k);
   protected UInt current_term;
   protected double current_value;
 
