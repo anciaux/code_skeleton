@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
-from class_dumper import ClassDumper
-from class_reader import ClassReader
+from class_dumper    import ClassDumper
+from class_reader    import ClassReader
+from class_decriptor import Method
 import os, re 
 
 class ClassDumperPython(ClassDumper):
@@ -25,6 +26,13 @@ class ClassDumperPython(ClassDumper):
             basename = self.makeBaseFilename(c.name)
             class_filename = os.path.join(self.output_dir,basename+".py")
             with open(class_filename,'w') as f:
+                f.write("""#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+\"\"\"
+Module containing class {0}
+\"\"\"
+""".format(c.name))
                 self.dumpClass(c,f)
 
         return ""
@@ -34,17 +42,18 @@ class ClassDumperPython(ClassDumper):
 
         sstr =  self.formatClassDeclaration(c)
         self.incTabulation()
+        sstr += """
+{0}\"\"\" 
+class {1}: TODO
+{0}\"\"\"
+""".format(self.getTabulation(),c.name)
+
         sstr += self.formatConstructors(c)
         sstr += self.formatMethods(c)
-        sstr += self.formatMembers(c)
         sstr += "\n" 
-
+        self.decTabulation()
 
         f.write("## -------------------------------------------------------------------------- ##\n")
-
-        if c.inheritance is not None:
-            for herit in c.inheritance:
-                f.write("#include \"" + self.makeBaseFilename(herit) + ".hh\"\n")                
 
         f.write(sstr)
         f.write("## -------------------------------------------------------------------------- ##\n")
@@ -53,9 +62,9 @@ class ClassDumperPython(ClassDumper):
         sstr = "class " + c.name
 
         if c.inheritance is not None:
-            sstr += ": public " + ", public ".join(c.inheritance)
+            sstr += "(" + ", ".join(c.inheritance) + ")"
             
-        sstr += "{\n"
+        sstr += ":\n"
         return sstr
 
 
@@ -68,11 +77,21 @@ class ClassDumperPython(ClassDumper):
             meths = c.getMethods(encaps)
             if c.name in meths:
                 for m in meths[c.name]:
-                    sstr += self.formatMethod(c,m)
+                    m.name = "__init__"
+                    sstr += self.formatMethod(c,m,pass_flag=False)
+                    self.incTabulation()
+                    sstr += self.formatMembers(c)
+                    sstr += self.getTabulation() + "pass\n\n"
+                    self.decTabulation()
+
+        for encaps in ['public','private', 'protected']:   
+            meths = c.getMethods(encaps)                 
             if '~' + c.name in meths:
                 for m in meths['~' + c.name]:
+                    m.name = "__del__"
                     sstr += self.formatMethod(c,m)
-        
+
+                        
 
         if not sstr == "": 
             sstr = """
@@ -94,7 +113,7 @@ class ClassDumperPython(ClassDumper):
             meths_names = set(meths.keys()) - set([c.name,'~'+c.name])
             meths_names = list(meths_names)
             if len(meths_names) is not 0:
-
+                sstr += self.getTabulation() + "# " + encaps + ":\n\n"
                 for n in meths_names:
                     for m in meths[n]:
                         sstr += self.formatMethod(c,m)
@@ -120,13 +139,11 @@ class ClassDumperPython(ClassDumper):
             if len(membs) is not 0:
                 for n,m in membs.iteritems():
                     sstr += self.formatMember(c,m)
-                sstr += "\n"
+                    sstr += "\n"
 
         if not sstr == "":
             sstr = """
-{0}## ------------------------------------------------------------------ ##
-{0}## Members                                                            ##
-{0}## ------------------------------------------------------------------ ##
+{0}## Members ---------------------- ##
 
 """.format(self.getTabulation()) + sstr
 
@@ -134,12 +151,20 @@ class ClassDumperPython(ClassDumper):
 
 
 
-    def formatMethod(self,c,m):
+    def formatMethod(self,c,m,pass_flag=True):
 
         sstr = ""
-        if m.static: raise
-        sstr += self.getTabulation() + "def " + m.name + "("
-        sstr += ", ".join([b for b,a in list(m.args.iteritems())])
+
+        name = m.name
+        first_param = "self"
+        if m.encapsulation == 'private': name = "__" + name
+        if m.encapsulation == 'protected': name = "_" + name
+        if m.static: 
+                sstr += self.getTabulation() + "@classmethod\n"
+                first_param = "cls"
+                
+        sstr += self.getTabulation() + "def " + name + "("
+        sstr += ", ".join([first_param]+[b for b,a in list(m.args.iteritems())])
         sstr +=  "):\n"
 
         self.incTabulation()
@@ -148,20 +173,30 @@ class ClassDumperPython(ClassDumper):
                 sstr += self.getTabulation() + "raise Exception('This is a pure virtual method')\n"
 
 
-        sstr += self.getTabulation() + "pass\n"
+        sstr += """
+{0}\"\"\"
+{0} Method {1}: TODO
+{0}\"\"\"
+""".format(self.getTabulation(),name)
+
+        if pass_flag: sstr += self.getTabulation() + "pass\n"
 
         self.decTabulation()
             
         return sstr
 
     def formatMember(self,c,m):
-        sstr = "  "
-        if m.static == 'static': sstr += 'static '
-        sstr += m.type + " " + m.name + ";\n"
+        if m.static == 'static': raise
+        name = m.name
+        if m.encapsulation == 'private': name = "__" + name
+        if m.encapsulation == 'protected': name = "_" + name
+
+        sstr = self.getTabulation() + "#" + m.type + " " + name + "\n"
+        sstr += self.getTabulation() + "self." + name + " = None\n"
         return sstr
 
     def getTabulation(self):
-        return "\t" * self.nb_tabulation
+        return "    " * self.nb_tabulation
 
     def incTabulation(self):
         self.nb_tabulation += 1
