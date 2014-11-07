@@ -173,11 +173,7 @@ class {1}: Documentation TODO
                 sstr += self.getTabulation() + "raise Exception('This is a pure virtual method')\n"
 
 
-        sstr += """
-{0}\"\"\"
-{0}Documentation TODO
-{0}\"\"\"
-""".format(self.getTabulation(),name)
+        sstr += "{0}\"\"\" Documentation TODO \"\"\"\n".format(self.getTabulation(),name)
 
         if pass_flag: sstr += self.getTabulation() + "pass\n"
 
