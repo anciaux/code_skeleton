@@ -9,14 +9,16 @@ class ClassDumperCPP(ClassDumper):
         ClassDumper.__init__(self)
         self.output_dir = output_dir
         
-    def dump(self,class_file):
+    def dump(self,class_file,make_system="cmake"):
         cls_reader = ClassReader()
         classes = cls_reader.read(class_file)
         for c in classes:
             self.dumpHeader(c)
             self.dumpCCFile(c)
 
+        self.dumpMain()
         self.dumpMakefile(classes)
+        self.dumpCMake(classes)
 
         return ""
 
@@ -47,6 +49,26 @@ clean:
         with open(make_filename,'w') as f:
             f.write(sstr)
 
+    def dumpCMake(self,classes):
+        make_filename = os.path.join(self.output_dir,'CMakeLists.txt')
+        CC_files     = [self.makeBaseFilename(c.name)+ ".cc" for c in classes]
+        obj_files    = [self.makeBaseFilename(c.name)+ ".o" for c in classes]
+        header_files = [self.makeBaseFilename(c.name)+ ".hh" for c in classes]
+
+        sstr = """
+cmake_minimum_required (VERSION 2.6)
+project (GeneratedFromCodeGenerator)
+
+add_executable(main 
+main.cc 
+{0})
+""".format("\n".join(CC_files))
+
+        with open(make_filename,'w') as f:
+            f.write(sstr)
+
+
+    def dumpMain(self):
         main_filename   = os.path.join(self.output_dir,"main.cc")
         with open(main_filename,'w') as f:
             f.write("""
@@ -60,9 +82,7 @@ int main(int argc, char ** argv){
 
   return EXIT_FAILURE;
 }""")
-        
 
-            
     def makeBaseFilename(self,class_name):
         name = re.sub(r'([0-9]|[A-Z0-9])','_\g<1>',class_name)
         name = name.lower()
