@@ -9,7 +9,7 @@ from class_dumper_classes import ClassDumperClasses
 import pygccxml.parser as gccparser
 from pygccxml import declarations
 ################################################################
-def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={}):
+def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=None):
     if type(fnames) is not list: fnames = [fnames]
 #    print fnames
     #parsing source file
@@ -22,20 +22,32 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={}):
     akantu = global_ns.namespace('akantu')
     
     for class_ in akantu.classes():
-        print class_
-        #print declarations.declaration_files(class_)
-        class_.name = declarations.templates.name(class_.name)
-        inheritance = [base.related_class.name for base in class_.bases]
-        #print inheritance
-        if inheritance == []: inheritance = None
-        c = cd.ClassDescriptor(class_.name,inheritance=inheritance)
-
+        if dec_dir is not None:
+            dec_file = declarations.declaration_files(class_)
+            #print class_
+            #print list(dec_file)
+            #print dec_dir
+            #print [os.path.dirname(f) for f in dec_file]
+            flags = [dec_dir == os.path.dirname(f) for f in dec_file]
+            flag = False
+            for f in flags: flag |= f
+            #print flags
+            if not flag: continue 
+            
         def cleanName(n):
             n = declarations.templates.name(str(n))
             ns = n.split('::')
             if len(ns) > 1: n = ns[-1]
             if not type(n) == str: raise Exception(str(n) + " - " + str(ns))
             return n
+
+        #print class_
+        class_.name = cleanName(class_.name)
+        inheritance = [cleanName(base.related_class.name) for base in class_.bases]
+        #print inheritance
+        if inheritance == []: inheritance = None
+        c = cd.ClassDescriptor(class_.name,inheritance=inheritance)
+
 
         for memb in class_.vars(allow_empty=True):
             name = memb.name
@@ -70,7 +82,7 @@ def analyzeFiles(dirname,extension_list = ['.cc','.cpp'],include_paths=None,cfla
     for f in os.listdir(dirname):
         base,ext = os.path.splitext(f)
         if ext in extension_list:
-            analyzeFile(os.path.join(dirname,f),include_paths=include_paths,cflags=cflags,class_cache=read_classes)
+            analyzeFile(os.path.join(dirname,f),include_paths=include_paths,cflags=cflags,class_cache=read_classes,dec_dir=dirname)
     dumper_class = ClassDumperClasses('test.classes')
     classes = [c for k,c in read_classes.iteritems()]
     dumper_class.dump(classes=classes)
@@ -89,7 +101,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args = vars(args)
 #    print args
-    src_dir = args['sources']
+    src_dir = os.path.dirname(args['sources'])
     inc_dirs = None
     cflags = args['cflags']
     if cflags is not None:
