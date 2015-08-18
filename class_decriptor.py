@@ -26,9 +26,9 @@ class Method:
 
         sstr += self.ret + " " + self.name + "("
         pairs = list(self.args.iteritems())
-        for k,_type in pairs[:-1]:
-            sstr += _type + " " + k + ", "
-        sstr += _type + " " + k + ")"
+        pairs = [a + " " + b for a,b in pairs]
+        sstr += ", ".join(pairs)
+        sstr += ")"
         return sstr
 
 class Member:
