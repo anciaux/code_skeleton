@@ -43,7 +43,7 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={}):
     
 
 ################################################################
-def analyzeFiles(dirname,extension_list = ['.hh','.hpp'],include_paths=None,cflags=None):
+def analyzeFiles(dirname,extension_list = ['.cc','.cpp'],include_paths=None,cflags=None):
     read_classes = {}
     for f in os.listdir(dirname):
         base,ext = os.path.splitext(f)
