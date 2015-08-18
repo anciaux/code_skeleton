@@ -7,6 +7,7 @@ class Typename:
 
 class Method:
     def __init__(self,name,args,ret,encapsulation,virtual,static,const,comments):
+
         self.name = name
         self.virtual = virtual
         self.static = static
@@ -19,14 +20,17 @@ class Method:
             self.encapsulation = 'public'
         self.comments = comments
         self.const = const
-            
+        #print "creating method {0}".format(name)
+        #print self.__dict__
+
+        
     def __str__(self):
         sstr = self.encapsulation + " "
         if not self.virtual == '': sstr += self.virtual + " "
 
         sstr += self.ret + " " + self.name + "("
         pairs = list(self.args.iteritems())
-        pairs = [a + " " + b for a,b in pairs]
+        pairs = [b + " " + a for a,b in pairs]
         sstr += ", ".join(pairs)
         sstr += ")"
         return sstr

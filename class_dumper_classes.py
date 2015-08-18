@@ -11,11 +11,14 @@ class ClassDumperClasses(ClassDumper):
         self.output_file = output_file
         self.nb_tabulation = 0
 
-    def dump(self,class_file):
-        cls_reader = ClassReader()
-        classes = cls_reader.read(class_file)
+    def dump(self,class_file=None,classes=None):
+        fout = open(self.output_file,'w')
+
+        if class_file is not None:
+            cls_reader = ClassReader()
+            classes = cls_reader.read(class_file)
         for c in classes:
-            self.dumpClass(c,sys.stderr)
+            self.dumpClass(c,fout)
         
     def dumpClass(self,c,f):
 
@@ -137,4 +140,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args = vars(args)
     dumper_class = ClassDumperClasses(args['output_file'])
-    dumper_class.dump(args['class_file'])
+    dumper_class.dump(class_file=args['class_file'])

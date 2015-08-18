@@ -3,6 +3,7 @@
 import subprocess,os,sys
 import class_decriptor as cd
 tmp_directory = '/tmp'
+from class_dumper_classes import ClassDumperClasses
 
 ################################################################
 import pygccxml.parser as gccparser
@@ -13,7 +14,7 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={}):
 #    print fnames
     #parsing source file
     #configure GCC-XML parser
-    print include_paths
+    #print include_paths
     if cflags is None: cflags = ''
     config = gccparser.gccxml_configuration_t( include_paths=include_paths,cflags=cflags, ignore_gccxml_output=True)
     decls = gccparser.parse( fnames, config)
@@ -22,22 +23,43 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={}):
     
     for class_ in akantu.classes():
         print class_
-        print declarations.declaration_files(class_)
+        #print declarations.declaration_files(class_)
+        class_.name = declarations.templates.name(class_.name)
         inheritance = [base.related_class.name for base in class_.bases]
-        print inheritance
+        #print inheritance
         if inheritance == []: inheritance = None
         c = cd.ClassDescriptor(class_.name,inheritance=inheritance)
+
+        def cleanName(n):
+            n = declarations.templates.name(str(n))
+            ns = n.split('::')
+            if len(ns) > 1: n = ns[-1]
+            if not type(n) == str: raise Exception(str(n) + " - " + str(ns))
+            return n
+
+        for memb in class_.vars(allow_empty=True):
+            name = memb.name
+            static = ""
+            if memb.type_qualifiers.has_static: static = 'static'
+            _type = cleanName(memb.type)
+            encapsulation = memb.access_type
+            c.addMember(name,_type,encapsulation,static,"")            
+            
         for foo in class_.member_functions(allow_empty=True):
             name = foo.name
-            static = foo.has_static
+            static = ""
+            if foo.has_static: static = 'static'
             const = foo.has_const
             virtual = foo.virtuality
             if virtual == 'not virtual': virtual = ''
-            ret = str(foo.return_type)
+
+            ret = cleanName(foo.return_type)
             encapsulation = foo.access_type
             args = foo.arguments
-            args = [(a.name,str(a.type)) for a in args]
+            
+            args = [(cleanName(a.type),a.name) for a in args]
             c.addMethod(name,args,ret,encapsulation,virtual,static,const,"")
+            #print c
         class_cache[class_.name] = c
     return class_cache
     
@@ -49,8 +71,11 @@ def analyzeFiles(dirname,extension_list = ['.cc','.cpp'],include_paths=None,cfla
         base,ext = os.path.splitext(f)
         if ext in extension_list:
             analyzeFile(os.path.join(dirname,f),include_paths=include_paths,cflags=cflags,class_cache=read_classes)
-    print read_classes.keys()
-            
+    dumper_class = ClassDumperClasses('test.classes')
+    classes = [c for k,c in read_classes.iteritems()]
+    dumper_class.dump(classes=classes)
+
+    
 ################################################################
 if __name__ == '__main__':
 
@@ -67,7 +92,8 @@ if __name__ == '__main__':
     src_dir = args['sources']
     inc_dirs = None
     cflags = args['cflags']
-    cflags = cflags.replace('\-','-')
+    if cflags is not None:
+        cflags = cflags.replace('\-','-')
 #    print cflags
     if args['includes'] is not None: inc_dirs = args['includes'].split(';')
     
