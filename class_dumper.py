@@ -6,13 +6,16 @@ class ClassDumper:
         self.base_types = ['int','double', 'float', 'unsigned int']
         self.base_types = self.base_types + [e + ' *' for e in self.base_types] + [e + ' &' for e in self.base_types]
 
-    def dump(self,class_file):
+    def dump(self,class_file,classes=None,**kwargs):
         cls_reader = ClassReader()
-        classes = cls_reader.read(class_file)
+        _classes = cls_reader.read(class_file)
         sstr = ""
-        for c in classes:
-            sstr += self.dumpFile(c)
-
+        for c in _classes:
+            if classes is None: condition = True
+            else: condition = (c.name in classes)
+            if condition: sstr += self.dumpFile(c)
+            else: print "ignore class '{0}'".format(c.name)
+            
         return sstr
 
         raise Exception('pure virtual function')

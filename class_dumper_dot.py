@@ -3,6 +3,10 @@
 
 from class_dumper import ClassDumper
 
+def protectStr(string):
+    return string.replace('<','\<').replace('>','\>')
+
+
 class ClassDumperDOT(ClassDumper):
     def __init__(self,inheritance_flag=True, colaboration_flag=True):
         ClassDumper.__init__(self)
@@ -10,14 +14,14 @@ class ClassDumperDOT(ClassDumper):
         self.inheritance_flag  = inheritance_flag
         self.colaboration_flag = colaboration_flag
         
-    def dump(self,class_file,output_filename):
+    def dump(self,class_file,output_filename,**kwargs):
         sstr = 'digraph "test"\n{'
         sstr += """
 edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"]; 
 node [fontname="Helvetica",fontsize="10",shape=record];
 """
 
-        sstr += ClassDumper.dump(self,class_file)
+        sstr += ClassDumper.dump(self,class_file,**kwargs)
         sstr += "}"
 
         with open(output_filename,'w') as f:
@@ -143,12 +147,13 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         return sstr
         return ""
 
+
     def formatMethod(self,c,m):
         arg_types = list(m.args.iteritems())
-        arg_types = [a for b,a in arg_types]
+        arg_types = [protectStr(a) for b,a in arg_types]
         sstr = ""
         if m.static: sstr += m.static + " "
-        if m.ret:    sstr += m.ret + " "
+        if m.ret:    sstr += protectStr(m.ret) + " "
         sstr += m.name + "(" + ",".join(arg_types) + ")"
         if m.virtual == 'pure virtual': sstr += "=0"
         return sstr
@@ -156,7 +161,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
     def formatMember(self,c,m):
         sstr = ""
         if m.static == 'static': sstr += 'static '
-        return sstr + m.type + " " + m.name
+        return sstr + protectStr(m.type) + " " + m.name
 
 
 
@@ -185,12 +190,15 @@ if __name__ == '__main__':
     parser.add_argument('--output','-o' , help='The file to be produced')
     parser.add_argument('--colaboration_no' , action='store_false', help='Disable the collaboration output')
     parser.add_argument('--inheritance_no' , action='store_false', help='Disable the inheritance output')
+    parser.add_argument('--classes' , type=str, help='The classes to output')
     
     args = parser.parse_args()
     args = vars(args)
     if args["output"] is None:
         args['output'] = os.path.splitext(args['class_file'])[0] + "." + args['format']
 
+    if args["classes"] is not None:
+        args["classes"] = args["classes"].split(',')
 
     inheritance_flag = True
     colaboration_flag = True
@@ -198,9 +206,11 @@ if __name__ == '__main__':
     if not args['colaboration_no'] : colaboration_flag = False        
 
     dumper_class = ClassDumperDOT(inheritance_flag, colaboration_flag)
-    
-    dot_file = os.path.splitext(args['class_file'])[0] + ".dot"
-    dumper_class.dump(args['class_file'],dot_file)
+
+    class_file = args['class_file']
+    del args['class_file']
+    dot_file = os.path.splitext(class_file)[0] + ".dot"
+    dumper_class.dump(class_file,dot_file,**args)
     exe           = ['dot']
     option_format = ['-T'+args['format'] ]
     option_output = ['-o', args['output'] ]
