@@ -35,6 +35,16 @@ class Method:
         sstr += ")"
         return sstr
 
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+            and self.__dict__ == other.__dict__)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash(str(self))
+
 class Member:
     def __init__(self,name,_type,encapsulation,static,comments):
         self.name = name
@@ -58,8 +68,8 @@ class ClassDescriptor:
 
     def addMethod(self,name,args,ret,encapsulation,virtual,static,const,comments):
         new_method = Method(name,args,ret,encapsulation,virtual,static,const,comments)
-        if name not in self.methods[encapsulation]: self.methods[encapsulation][name] = []
-        self.methods[encapsulation][name].append(new_method)
+        if name not in self.methods[encapsulation]: self.methods[encapsulation][name] = set()
+        self.methods[encapsulation][name].add(new_method)
 
     def addMember(self,name,_type,encapsulation,static,comments):
         new_member = Member(name,_type,encapsulation,static,comments)

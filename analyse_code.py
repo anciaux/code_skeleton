@@ -8,8 +8,19 @@ from class_dumper_classes import ClassDumperClasses
 ################################################################
 import pygccxml.parser as gccparser
 from pygccxml import declarations
+
 ################################################################
-def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=None):
+def cleanName(n,**kwargs):
+    n = str(n)
+    if ('template' in kwargs) and kwargs['template'] is False: 
+        n = declarations.templates.name(str(n))
+    if ('namespace' in kwargs) and kwargs['namespace'] is False: 
+        ns = n.split('::')
+        if len(ns) > 1: n = ns[-1]
+    n = str(n)
+    return n
+################################################################
+def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=None,**kwargs):
     if type(fnames) is not list: fnames = [fnames]
 #    print fnames
     #parsing source file
@@ -34,16 +45,10 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
             #print flags
             if not flag: continue 
             
-        def cleanName(n):
-            n = declarations.templates.name(str(n))
-            ns = n.split('::')
-            if len(ns) > 1: n = ns[-1]
-            if not type(n) == str: raise Exception(str(n) + " - " + str(ns))
-            return n
 
         #print class_
-        class_.name = cleanName(class_.name)
-        inheritance = [cleanName(base.related_class.name) for base in class_.bases]
+        class_.name = cleanName(class_.name,**kwargs)
+        inheritance = [cleanName(base.related_class.name,**kwargs) for base in class_.bases]
         #print inheritance
         if inheritance == []: inheritance = None
         c = cd.ClassDescriptor(class_.name,inheritance=inheritance)
@@ -53,7 +58,7 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
             name = memb.name
             static = ""
             if memb.type_qualifiers.has_static: static = 'static'
-            _type = cleanName(memb.type)
+            _type = cleanName(memb.type,**kwargs)
             encapsulation = memb.access_type
             c.addMember(name,_type,encapsulation,static,"")            
             
@@ -65,11 +70,11 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
             virtual = foo.virtuality
             if virtual == 'not virtual': virtual = ''
 
-            ret = cleanName(foo.return_type)
+            ret = cleanName(foo.return_type,**kwargs)
             encapsulation = foo.access_type
             args = foo.arguments
             
-            args = [(cleanName(a.type),a.name) for a in args]
+            args = [(cleanName(a.type,**kwargs),a.name) for a in args]
             c.addMethod(name,args,ret,encapsulation,virtual,static,const,"")
             #print c
         class_cache[class_.name] = c
@@ -77,15 +82,16 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
     
 
 ################################################################
-def analyzeFiles(dirname,extension_list = ['.cc','.cpp'],include_paths=None,cflags=None):
+def analyzeFiles(dirname,extension_list = ['.cc','.cpp','.hh','.hpp'],output=None,**kwargs):
     read_classes = {}
     for f in os.listdir(dirname):
         base,ext = os.path.splitext(f)
         if ext in extension_list:
-            analyzeFile(os.path.join(dirname,f),include_paths=include_paths,cflags=cflags,class_cache=read_classes,dec_dir=dirname)
-    dumper_class = ClassDumperClasses('test.classes')
-    classes = [c for k,c in read_classes.iteritems()]
-    dumper_class.dump(classes=classes)
+            analyzeFile(os.path.join(dirname,f),class_cache=read_classes,dec_dir=dirname,**kwargs)
+    if output is not None:
+        dumper_class = ClassDumperClasses(output)
+        classes = [c for k,c in read_classes.iteritems()]
+        dumper_class.dump(classes=classes)
 
     
 ################################################################
@@ -96,18 +102,19 @@ if __name__ == '__main__':
     parser.add_argument('--sources','-s', help='The directory where the sources are loacted',required=True)
     parser.add_argument('--includes','-I', type=str,help='The needed includes')
     parser.add_argument('--cflags','-f', type=str,help='The needed flags')
+    parser.add_argument('--template','-t', action='store_false',help='Remove templates from analysis')
+    parser.add_argument('--namespace','-n', action='store_false',help='Remove namespaces from analysis')
+    parser.add_argument('--output','-o', type=str,help='filename to store output')
     
 
     args = parser.parse_args()
     args = vars(args)
-#    print args
     src_dir = os.path.dirname(args['sources'])
     inc_dirs = None
     cflags = args['cflags']
-    if cflags is not None:
-        cflags = cflags.replace('\-','-')
-#    print cflags
+    if cflags is not None: cflags = cflags.replace('\-','-')
+    args['cflags'] = cflags
     if args['includes'] is not None: inc_dirs = args['includes'].split(';')
     
-    analyzeFiles(src_dir,include_paths=inc_dirs,cflags=cflags)
+    analyzeFiles(src_dir,include_paths=inc_dirs,**args)
     
