@@ -20,7 +20,7 @@ def cleanName(n,**kwargs):
     n = str(n)
     return n
 ################################################################
-def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=None,**kwargs):
+def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=None,required_namespace=None,**kwargs):
     if type(fnames) is not list: fnames = [fnames]
 #    print fnames
     #parsing source file
@@ -28,11 +28,21 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
     #print include_paths
     if cflags is None: cflags = ''
     config = gccparser.gccxml_configuration_t( include_paths=include_paths,cflags=cflags, ignore_gccxml_output=True)
-    decls = gccparser.parse( fnames, config)
-    global_ns = declarations.get_global_namespace( decls )
-    akantu = global_ns.namespace('akantu')
+    try:
+        decls = gccparser.parse( fnames, config)
+    except Exception as e:
+        print "Could not parse files '{0}'".format(fnames)
+        print e
+        return class_cache
     
-    for class_ in akantu.classes():
+    global_ns = declarations.get_global_namespace( decls )
+    if required_namespace is not None:
+        try: required_namespace = global_ns.namespace(required_namespace)
+        except: return class_cache
+    else: required_namespace = global_ns
+
+        
+    for class_ in required_namespace.classes():
         if dec_dir is not None:
             dec_file = declarations.declaration_files(class_)
             #print class_
@@ -82,7 +92,7 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
     
 
 ################################################################
-def analyzeFiles(dirname,extension_list = ['.cc','.cpp','.hh','.hpp'],output=None,**kwargs):
+def analyzeFiles(dirname,extension_list = ['.hh','.hpp'],output=None,**kwargs):
     read_classes = {}
     for f in os.listdir(dirname):
         base,ext = os.path.splitext(f)
@@ -105,6 +115,7 @@ if __name__ == '__main__':
     parser.add_argument('--template','-t', action='store_false',help='Remove templates from analysis')
     parser.add_argument('--namespace','-n', action='store_false',help='Remove namespaces from analysis')
     parser.add_argument('--output','-o', type=str,help='filename to store output')
+    parser.add_argument('--required_namespace','-rn', type=str,help='filter classes based on namespace')
     
 
     args = parser.parse_args()
