@@ -94,10 +94,16 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
 ################################################################
 def analyzeFiles(dirname,extension_list = ['.hh','.hpp'],output=None,**kwargs):
     read_classes = {}
-    for f in os.listdir(dirname):
-        base,ext = os.path.splitext(f)
-        if ext in extension_list:
-            analyzeFile(os.path.join(dirname,f),class_cache=read_classes,dec_dir=dirname,**kwargs)
+    if os.path.isfile(dirname): files = [dirname]
+    else:
+        files = []
+        for f in os.listdir(dirname):
+            base,ext = os.path.splitext(f)
+            if ext in extension_list: files.append(os.path.join(dirname,f))
+            
+    if os.path.isfile(dirname): dirname = None
+    for f in files:
+        analyzeFile(f,class_cache=read_classes,dec_dir=dirname,**kwargs)
     if output is not None:
         dumper_class = ClassDumperClasses(output)
         classes = [c for k,c in read_classes.iteritems()]
@@ -120,7 +126,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args = vars(args)
-    src_dir = os.path.dirname(args['sources'])
+    src_dir = args['sources']
     inc_dirs = None
     cflags = args['cflags']
     if cflags is not None: cflags = cflags.replace('\-','-')
