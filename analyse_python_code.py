@@ -14,12 +14,15 @@ def analyzeFile(fnames,**kwargs):
     modname = os.path.basename(modfile)
     modname = os.path.splitext(modname)[0]
     mymod = imp.load_source(modname,modfile)
+
+    exclude_members = ['__module__','__doc__']
     for k,v, in mymod.__dict__.iteritems():
         if inspect.isclass(v):
-            print k
-            for n,m in inspect.getmembers(v):
-                print n
-
+            c = cd.ClassDescriptor(k,inheritance=None)
+            for name,m in inspect.getmembers(v) :
+                if name in exclude_members: continue
+                c.addMember(name,"Unknown","public","","")            
+            print c
 
 ################################################################
 def analyzeFiles(dirname,extension_list = ['.py'],output=None,**kwargs):

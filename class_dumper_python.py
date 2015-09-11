@@ -28,7 +28,17 @@ class ClassDumperPython(ClassDumper):
             with open(class_filename,'w') as f:
                 f.write("""#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+""")
+                imports = []
+                if c.inheritance is not None:
+                    imports = ["from " + self.makeBaseFilename(i) + " import *" for i in c.inheritance]
+                imports = "\n".join(imports)
+                f.write("""#################\n""")
+                f.write(imports)
+                f.write("""\n#################\n""")
+        
+                        
+                f.write("""
 \"\"\"
 Module containing class {0}
 \"\"\"
