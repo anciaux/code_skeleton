@@ -2,6 +2,7 @@
 
 import inspect
 import imp
+import re
 import subprocess,os,sys
 import class_decriptor as cd
 tmp_directory = '/tmp'
@@ -21,7 +22,22 @@ def analyzeFile(fnames,**kwargs):
             c = cd.ClassDescriptor(k,inheritance=None)
             for name,m in inspect.getmembers(v) :
                 if name in exclude_members: continue
-                c.addMember(name,"Unknown","public","","")            
+                if inspect.ismethod(m):
+                    args = [("PyObject",a) for a in inspect.getargspec(m).args if not a == 'self']
+#                    print name
+                    encaps = 'public'
+                    if name == '__init__': name = k
+                    elif re.match('__.*__',name): pass
+                    elif re.match('_' + k + '__.*',name):
+                        m = re.match('_' + k + '__(.*)',name)
+                        name = m.group(1)
+                        encaps = 'private'
+                    elif re.match('_.*',name):  encaps = 'protected'
+
+                    c.addMethod(name,args,"PyObject",encaps,"","","","")
+
+                    
+                        
             print c
 
 ################################################################
