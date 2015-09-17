@@ -45,13 +45,13 @@ Module containing class {0}
 """.format(c.name))
                 self.dumpClass(c,f)
 
-        f.write("""
+                f.write("""
 
 
 if __name__ == '__main__':
         test = {0}()
 
-""".format(c.name)
+""".format(c.name))
                 
         return ""
 
