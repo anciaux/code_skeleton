@@ -1,5 +1,0 @@
-class Singleton
-  public static Object & Instance() const;
-  private static Object obj;
-
-

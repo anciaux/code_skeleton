@@ -9,7 +9,33 @@ tmp_directory = '/tmp'
 from class_dumper_classes import ClassDumperClasses
 
 ################################################################
-def analyzeFile(fnames,**kwargs):
+def getClassEncapsulation(name):
+#    print "CCCCCCCCCCCc " + name
+    if re.match('_(.*?)_(.*)',name):
+        m = re.match('_(.*?)_(.*)',name)
+        name = m.group(2)
+        if name[0] == '_':
+            encaps = 'private'
+            name = name[1:]
+        else:              encaps = 'protected'
+        return name,encaps        
+    return name,'public'
+
+################################################################
+def getEncapsulation(name):
+#    print "CCCCCCCCCCCc " + name
+    if re.match('_(.*)',name):
+        m = re.match('_(.*)',name)
+        name = m.group(1)
+        if name[0] == '_':
+            encaps = 'private'
+            name = name[1:]
+        else: encaps = 'protected'
+        return name,encaps        
+    return name,'public'
+
+################################################################
+def analyzeFile(fnames,class_cache={},**kwargs):
     print fnames
     modfile = fnames
     modname = os.path.basename(modfile)
@@ -19,29 +45,45 @@ def analyzeFile(fnames,**kwargs):
     exclude_members = ['__module__','__doc__']
     for k,v, in mymod.__dict__.iteritems():
         if inspect.isclass(v):
+            print k
             c = cd.ClassDescriptor(k,inheritance=None)
             for name,m in inspect.getmembers(v) :
+                #print name
                 if name in exclude_members: continue
                 if inspect.ismethod(m):
                     args = [("PyObject",a) for a in inspect.getargspec(m).args if not a == 'self']
 #                    print name
                     encaps = 'public'
-                    if name == '__init__': name = k
+                    if name == '__init__':
+                        name = k
+                        lines = inspect.getsourcelines(m)
+#                        print lines
+                        for l in lines[0]:
+                            m = re.match('\s*self\.(.*)=(.*)',l)
+                            if m:
+                                name = m.group(1)
+                                member,encaps_member = getEncapsulation(name)
+#                                print member,encaps
+                                c.addMember(member,"PyObject",encaps,"","")                                
+                                
                     elif re.match('__.*__',name): pass
-                    elif re.match('_' + k + '__.*',name):
-                        m = re.match('_' + k + '__(.*)',name)
-                        name = m.group(1)
-                        encaps = 'private'
-                    elif re.match('_.*',name):  encaps = 'protected'
+                    else:
+                        name,encaps = getClassEncapsulation(name)
 
                     c.addMethod(name,args,"PyObject",encaps,"","","","")
+            class_cache[k] = c
+    return class_cache
 
-                    
-                        
-            print c
 
 ################################################################
-def analyzeFiles(dirname,extension_list = ['.py'],output=None,**kwargs):
+def analyzeFiles(dirname,extension_list = ['.py'],output=None,import_dir=None,**kwargs):
+
+    if import_dir is not None:
+        if type(import_dir) == str: import_dir = import_dir.split(':')
+        for p in import_dir:
+            path = os.path.expanduser(p)
+            sys.path.append(path)
+
     read_classes = {}
     if os.path.isfile(dirname): files = [dirname]
     else:
@@ -66,6 +108,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Code analyzer to produce .classes description')
     parser.add_argument('--sources','-s', help='The directory where the sources are loacted',required=True)
     parser.add_argument('--output','-o', type=str,help='filename to store output')
+    parser.add_argument('--import_dir','-i', type=str,help='directories to scan for imports')
 
     args = parser.parse_args()
     args = vars(args)

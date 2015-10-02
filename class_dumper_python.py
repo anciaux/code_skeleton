@@ -66,6 +66,7 @@ class {1}: Documentation TODO
 {0}\"\"\"
 """.format(self.getTabulation(),c.name)
 
+        sstr += self.formatStaticMembers(c)
         sstr += self.formatConstructors(c)
         sstr += self.formatMethods(c)
         sstr += "\n" 
@@ -90,24 +91,30 @@ class {1}: Documentation TODO
     def formatConstructors(self,c):
         sstr = ""
 
+        meths = {}
         for encaps in ['public','private', 'protected']:
+            meths.update(c.getMethods(encaps))
             
-            meths = c.getMethods(encaps)
-            if c.name in meths:
-                for m in meths[c.name]:
-                    m.name = "__init__"
-                    sstr += self.formatMethod(c,m,pass_flag=False)
-                    self.incTabulation()
-                    sstr += self.formatMembers(c)
-                    sstr += self.getTabulation() + "pass\n\n"
-                    self.decTabulation()
+        if c.name in meths:
+            for m in meths[c.name]:
+                m.name = "__init__"
+                sstr += self.formatMethod(c,m,pass_flag=False)
+                self.incTabulation()
+                sstr += self.formatMembers(c)
+                sstr += self.getTabulation() + "pass\n\n"
+                self.decTabulation()
+        else:
+            m = Method('__init__',"","",'public','','','','default constructor')
+            sstr += self.formatMethod(c,m,pass_flag=False)
+            self.incTabulation()
+            sstr += self.formatMembers(c)
+            sstr += self.getTabulation() + "pass\n\n"
+            self.decTabulation()
 
-        for encaps in ['public','private', 'protected']:   
-            meths = c.getMethods(encaps)                 
-            if '~' + c.name in meths:
-                for m in meths['~' + c.name]:
-                    m.name = "__del__"
-                    sstr += self.formatMethod(c,m)
+        if '~' + c.name in meths:
+            for m in meths['~' + c.name]:
+                m.name = "__del__"
+                sstr += self.formatMethod(c,m)
 
                         
 
@@ -151,11 +158,13 @@ class {1}: Documentation TODO
     def formatMembers(self,c):
         sstr = ""
 
+#        print c.name,c.members
         for encaps in ['public','private', 'protected']:
             
             membs = c.getMembers(encaps)
             if len(membs) is not 0:
                 for n,m in membs.iteritems():
+                    if m.static == 'static': continue
                     sstr += self.formatMember(c,m)
                     sstr += "\n"
 
@@ -167,6 +176,26 @@ class {1}: Documentation TODO
 
         return sstr
 
+    def formatStaticMembers(self,c):
+        sstr = ""
+
+#        print c.name,c.members
+        for encaps in ['public','private', 'protected']:
+            
+            membs = c.getMembers(encaps)
+            if len(membs) is not 0:
+                for n,m in membs.iteritems():
+                    if not m.static == 'static': continue
+                    sstr += self.formatStaticMember(c,m)
+                    sstr += "\n"
+
+        if not sstr == "":
+            sstr = """
+{0}## Members ---------------------- ##
+
+""".format(self.getTabulation()) + sstr
+
+        return sstr
 
 
     def formatMethod(self,c,m,pass_flag=True):
@@ -200,13 +229,21 @@ class {1}: Documentation TODO
         return sstr
 
     def formatMember(self,c,m):
-        if m.static == 'static': raise
         name = m.name
         if m.encapsulation == 'private': name = "__" + name
         if m.encapsulation == 'protected': name = "_" + name
 
         sstr = self.getTabulation() + "#" + m.type + " " + name + "\n"
         sstr += self.getTabulation() + "self." + name + " = None\n"
+        return sstr
+
+    def formatStaticMember(self,c,m):
+        name = m.name
+        if m.encapsulation == 'private': name = "__" + name
+        if m.encapsulation == 'protected': name = "_" + name
+
+        sstr = self.getTabulation() + "#" + m.type + " " + name + "\n"
+        sstr += self.getTabulation() + name + " = None\n"
         return sstr
 
     def getTabulation(self):

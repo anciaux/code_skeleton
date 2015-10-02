@@ -61,7 +61,6 @@ class ClassReader:
         return True
 
     def isNewMemberTag(self,line):
-
         if not line.find("(") == -1: return False
         if not line.find(")") == -1: return False
         m = re.match(r'((?:public|protected|private)*)\s*((?:static)?)\s*((?:\S|(?:\s+\*)|(?:\s+\&))+)\s+(\S*)[\s|;]*(?://)*(.*)',line)
@@ -107,7 +106,7 @@ class ClassReader:
                     temp_args.append(tuple([" ".join(l[:-1]),l[-1]]))
             args = temp_args
             args = [e for e in args if not e[0] == '']
-            self.current_class.addMethod(name,args,ret,encapsulation,virtual,static,const,comments)            
+            self.current_class.addMethod(name,args,ret,encapsulation,virtual,static,const,comments)
             return True
         return False
 
