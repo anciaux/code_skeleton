@@ -1,0 +1,11 @@
+class Animal
+  public virtual void scream()=0;
+  public std::string getName(); 
+  protected std::string name;
+
+class Cat(Animal)
+  public virtual void scream();
+
+class Dog(Animal)
+  public virtual void scream();
+
