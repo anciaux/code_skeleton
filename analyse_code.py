@@ -47,16 +47,18 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
             dec_file = declarations.declaration_files(class_)
             #print class_
             #print list(dec_file)
-            #print dec_dir
+            #print os.path.abspath(dec_dir)
             #print [os.path.dirname(f) for f in dec_file]
-            flags = [dec_dir == os.path.dirname(f) for f in dec_file]
+            flags = [os.path.abspath(dec_dir) == os.path.abspath(os.path.dirname(f)) for f in dec_file]
             flag = False
             for f in flags: flag |= f
             #print flags
+            #print flag
             if not flag: continue 
             
 
-        #print class_
+        print class_
+        print class_.name
         class_.name = cleanName(class_.name,**kwargs)
         inheritance = [cleanName(base.related_class.name,**kwargs) for base in class_.bases]
         #print inheritance
@@ -86,13 +88,14 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
             
             args = [(cleanName(a.type,**kwargs),a.name) for a in args]
             c.addMethod(name,args,ret,encapsulation,virtual,static,const,"")
-            #print c
         class_cache[class_.name] = c
     return class_cache
     
 
 ################################################################
 def analyzeFiles(dirname,extension_list = ['.hh','.hpp'],output=None,**kwargs):
+
+    if output is None: raise
     read_classes = {}
     if os.path.isfile(dirname): files = [dirname]
     else:
@@ -104,6 +107,10 @@ def analyzeFiles(dirname,extension_list = ['.hh','.hpp'],output=None,**kwargs):
     if os.path.isfile(dirname): dirname = None
     for f in files:
         analyzeFile(f,class_cache=read_classes,dec_dir=dirname,**kwargs)
+
+    print read_classes.keys()
+    
+    
     if output is not None:
         dumper_class = ClassDumperClasses(output)
         classes = [c for k,c in read_classes.iteritems()]
