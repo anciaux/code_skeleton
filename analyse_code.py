@@ -73,7 +73,21 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
             _type = cleanName(memb.type,**kwargs)
             encapsulation = memb.access_type
             c.addMember(name,_type,encapsulation,static,"")            
+
+        for cons in class_.constructors():
+            name = cons.name
+            static = ""
+            const = cons.has_const
+            virtual = cons.virtuality
+            if virtual == 'not virtual': virtual = ''
+
+            ret = ""
+            encapsulation = cons.access_type
+            args = cons.arguments
             
+            args = [(cleanName(a.type,**kwargs),a.name) for a in args]
+            c.addMethod(name,args,ret,encapsulation,virtual,static,const,"")
+
         for foo in class_.member_functions(allow_empty=True):
             name = foo.name
             static = ""
