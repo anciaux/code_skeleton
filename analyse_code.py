@@ -33,6 +33,7 @@ def analyzeFile(fnames,include_paths=None,cflags=None,class_cache={},dec_dir=Non
     except Exception as e:
         print "Could not parse files '{0}'".format(fnames)
         print e
+        raise
         return class_cache
     
     global_ns = declarations.get_global_namespace( decls )

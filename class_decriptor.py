@@ -56,6 +56,11 @@ class Member:
     def __str__(self):
         return self.encapsulation + " " + self.type + " " + self.name
 
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+            and self.__dict__ == other.__dict__)
+
+    
 class ClassDescriptor:
 
 
