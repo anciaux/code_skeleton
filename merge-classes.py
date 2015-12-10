@@ -2,6 +2,7 @@
 
 ################################################################
 import os, re, sys
+import argparse
 from class_dumper    import ClassDumper
 from class_dumper_classes    import ClassDumperClasses
 from class_reader    import ClassReader
@@ -57,7 +58,7 @@ def merge(files,output):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Classes descriptor merge')
-    parser.add_argument('class_files', help='The class files to merge',required=True)
+    parser.add_argument('class_files', nargs='+', help='The class files to merge')
     parser.add_argument('--output_file','-o' , help='The file where to put the classes description',required=True)
 
     args = parser.parse_args()
@@ -67,5 +68,6 @@ if __name__ == '__main__':
     class_files = args['class_files']
     output_file = args['output_file']
 
-    print args
+    merge(class_files,output_file)
+
     
