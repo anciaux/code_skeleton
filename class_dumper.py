@@ -25,7 +25,7 @@ class ClassDumper(object):
         if self.selected_classes is None:
             self.selected_classes = []
 
-    def dump(self, class_file=None):
+    def dump(self, class_file=None, **kwargs):
 
         " perform the dump "
 
@@ -34,7 +34,6 @@ class ClassDumper(object):
         if class_file is not None:
             cls_reader = ClassReader()
             _all_classes = cls_reader.read(class_file)
-
 
         classes = []
 
@@ -48,7 +47,7 @@ class ClassDumper(object):
             else:
                 print("ignore class '{0}'".format(_class.name))
 
-        self.dump_classes(classes)
+        self.dump_classes(classes, **kwargs)
 
     @abstractmethod
     def dump_classes(self, classes):

@@ -225,8 +225,8 @@ def main():
     args = parser.parse_args()
     args = vars(args)
     if args["output"] is None:
-        args['output'] = os.path.splitext(args['class_file'])[0]
-        + "." + args['format']
+        args['output'] = os.path.splitext(args['class_file'])[0] +\
+                         "." + args['format']
 
     if args["classes"] is not None:
         args["classes"] = args["classes"].split(',')
@@ -238,12 +238,11 @@ def main():
     if not args['colaboration_no']:
         colaboration_flag = False
 
-    dumper_class = ClassDumperDOT(inheritance_flag, colaboration_flag)
-
     class_file = args['class_file']
     del args['class_file']
     dot_file = os.path.splitext(class_file)[0] + ".dot"
-    dumper_class.dump(class_file, dot_file, **args)
+    dumper_class = ClassDumperDOT(inheritance_flag, colaboration_flag, dot_file)
+    dumper_class.dump(class_file, **args)
     exe = ['dot']
     option_format = ['-T'+args['format']]
     option_output = ['-o', args['output']]
