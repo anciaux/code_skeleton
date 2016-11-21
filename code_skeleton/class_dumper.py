@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import print_function
 import re
 from abc import ABCMeta, abstractmethod
-from class_reader import ClassReader
+from code_skeleton.class_reader import ClassReader
 ################################################################
 __author__ = "Guillaume Anciaux"
 __copyright__ = "Copyright EPFL"

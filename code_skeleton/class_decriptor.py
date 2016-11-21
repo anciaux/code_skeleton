@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+from __future__ import print_function
 ################################################################
 __author__ = "Guillaume Anciaux"
 __copyright__ = "Copyright EPFL"
@@ -182,12 +183,3 @@ class ClassDescriptor(object):
 
 ################################################################
 
-def main():
-    my_class = ClassDescriptor('dummy')
-    my_class.add_method('compute', [('int', 'arg1'), ('double', 'arg2')], 'bool', 'public', '')
-    my_class.add_member('res', 'double', 'private')
-    print my_class
-
-################################################################
-if __name__ == '__main__':
-    main()

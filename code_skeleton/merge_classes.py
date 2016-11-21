@@ -24,9 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 ################################################################
+from __future__ import print_function
 import argparse
-from class_dumper_classes    import ClassDumperClasses
-from class_reader    import ClassReader
+from code_skeleton.class_dumper_classes    import ClassDumperClasses
+from code_skeleton.class_reader    import ClassReader
 ################################################################
 __author__ = "Guillaume Anciaux"
 __copyright__ = "Copyright EPFL"
@@ -42,13 +43,13 @@ __status__ = "Beta"
 def merge(files, output_filename):
 
     "takes a list of files and produce a single one"
-    print files
+    print (files)
     classes = []
     for class_file in files:
         cls_reader = ClassReader()
         classes.append(cls_reader.read(class_file))
 
-    print len(classes), " files to merge"
+    print (len(classes), " files to merge")
 
     merged_classes = {}
 
@@ -64,7 +65,7 @@ def merge(files, output_filename):
                     for mname, method in methods.iteritems():
                         if mname in pclass.methods[encaps]:
                             if not pclass.methods[encaps][mname] == method:
-                                print "Warming: ", ((c.name, encaps, mname))
+                                print ("Warming: ", ((c.name, encaps, mname)))
                         else:
                             pclass.methods[encaps][mname] = method
 
@@ -72,7 +73,7 @@ def merge(files, output_filename):
                     for mname, member in members.iteritems():
                         if mname in pclass.members[encaps]:
                             if not pclass.members[encaps][mname] == member:
-                                print "Warming: ", ((c.name, encaps, mname))
+                                print ("Warming: ", ((c.name, encaps, mname)))
                             else:
                                 pclass.members[encaps][mname] = member
 

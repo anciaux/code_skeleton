@@ -1,4 +1,4 @@
-import class_decriptor
-import class_dumper
-import class_reader
-import merge_classes   
+import code_skeleton.class_decriptor
+import code_skeleton.class_dumper
+import code_skeleton.class_reader
+import code_skeleton.merge_classes
