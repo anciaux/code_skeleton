@@ -48,9 +48,11 @@ def _protect_str(string):
 
 class ClassDumperDOT(ClassDumper):
 
+    " Dumper to DOT (GraphViz format) "
+
     def __init__(self, output_file,
                  inheritance_flag=True,
-                 colaboration_flag=True):
+                 collaboration_flag=True):
 
         if not isinstance(output_file, str):
             raise Exception('invalid filename: {0}'.format(output_file))
@@ -58,7 +60,7 @@ class ClassDumperDOT(ClassDumper):
         ClassDumper.__init__(self)
         self.encaps_symbol = {'public': '+', 'private': '-', 'protected': '#'}
         self.inheritance_flag = inheritance_flag
-        self.colaboration_flag = colaboration_flag
+        self.collaboration_flag = collaboration_flag
         self.output_file = output_file
 
     def dump_classes(self, classes, **kwargs):
@@ -91,7 +93,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         sstr += '}"];\n'
         if self.inheritance_flag:
             sstr += self._format_inheritance(_class)
-        if self.colaboration_flag:
+        if self.collaboration_flag:
             sstr += self._format_compositions(_class)
 
         sstr += self._format_types(_class)
@@ -128,14 +130,14 @@ node [fontname="Helvetica",fontsize="10",shape=record];
                     sstr = "|"
                 sstr += self.encaps_symbol[encaps] + " "
                 for cons in meths[_class.name]:
-                    sstr += self._format_method(_class, cons)
+                    sstr += self._format_method(cons)
                     sstr += "\\l"
             if '~' + _class.name in meths:
                 if sstr == "":
                     sstr = "|"
                 sstr += self.encaps_symbol[encaps] + " "
                 for cons in meths['~' + _class.name]:
-                    sstr += self.formatMethod(_class, cons)
+                    sstr += self._format_method(cons)
                     sstr += "\\l"
 
         return sstr
@@ -157,7 +159,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
                         if sstr == "":
                             sstr = "|"
                         sstr += self.encaps_symbol[encaps] + " "
-                        sstr += self._format_method(_class, meth)
+                        sstr += self._format_method(meth)
                         sstr += "\\l"
 
         return sstr
@@ -174,7 +176,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
                     if sstr == "":
                         sstr = "|"
                     sstr += self.encaps_symbol[encaps] + " "
-                    sstr += self._format_member(_class, memb)
+                    sstr += self._format_member(memb)
                     sstr += "\\l"
 
         return sstr
@@ -185,14 +187,14 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
             membs = _class.get_members(encaps)
             if len(membs) is not 0:
-                for _name, memb in membs.iteritems():
+                for dummy_name, memb in membs.iteritems():
                     if memb.type in self.base_types:
                         continue
                     composition_set.add(self.base_type(memb.type))
 
         sstr = ""
-        for t in composition_set:
-            sstr += '"{0}" '.format(t) + " -> " + '"{0}" '.format(_class.name)
+        for comp in composition_set:
+            sstr += '"{0}" '.format(comp) + " -> " + '"{0}" '.format(_class.name)
             sstr += ('[style="dashed",color="midnightblue",'
                      'fontname="Helvetica",arrowtail="odiamond",'
                      'fontsize="10",dir="back"];\n')
@@ -205,21 +207,25 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         for encaps in ['public', 'private', 'protected']:
             if _class.types[encaps] is not None:
 
-                for t in _class.types[encaps]:
-                    if t in self.base_types:
+                for _type in _class.types[encaps]:
+                    if _type in self.base_types:
                         continue
-                    sstr += '"{0}" '.format(_class.name) + " -> "
-                    + '"{0}" '.format(t)
+                    sstr += '"{0}" '.format(_class.name) + " -> " \
+                            + '"{0}" '.format(_type)
                     sstr += ('[style="solid",color="black",'
                              'fontname="Helvetica",arrowtail="odiamond",'
                              'fontsize="10",dir="back"];\n')
         return sstr
-        return ""
 
-    def _format_method(self, _class, meth):
+    @classmethod
+    def _format_method(cls, meth):
         arg_types = list(meth.args.iteritems())
-        arg_types = [_protect_str(a) for b, a in arg_types]
+        arg_types = [_protect_str(a) for dummy_b, a in arg_types]
         sstr = ""
+        if meth.virtual == 'virtual' or\
+           meth.virtual == 'pure virtual':
+            sstr += 'virtual '
+
         if meth.static:
             sstr += meth.static + " "
         if meth.ret:
@@ -229,7 +235,8 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             sstr += "=0"
         return sstr
 
-    def _format_member(self, _class, memb):
+    @classmethod
+    def _format_member(cls, memb):
         sstr = ""
         if memb.static == 'static':
             sstr += 'static '
@@ -248,7 +255,7 @@ def main():
                         help='The format of the produced graph file')
     parser.add_argument('--output', '-o',
                         help='The file to be produced')
-    parser.add_argument('--colaboration_no', action='store_false',
+    parser.add_argument('--collaboration_no', action='store_false',
                         help='Disable the collaboration output')
     parser.add_argument('--inheritance_no', action='store_false',
                         help='Disable the inheritance output')
@@ -265,17 +272,17 @@ def main():
         args["class_filter"] = args["class_filter"].split(',')
 
     inheritance_flag = True
-    colaboration_flag = True
+    collaboration_flag = True
     if not args['inheritance_no']:
         inheritance_flag = False
-    if not args['colaboration_no']:
-        colaboration_flag = False
+    if not args['collaboration_no']:
+        collaboration_flag = False
 
     class_file = args['class_file']
     del args['class_file']
     dot_file = os.path.splitext(class_file)[0] + ".dot"
     dumper_class = ClassDumperDOT(dot_file, inheritance_flag,
-                                  colaboration_flag)
+                                  collaboration_flag)
     dumper_class.dump(class_file, **args)
     exe = ['dot']
     option_format = ['-T'+args['format']]
