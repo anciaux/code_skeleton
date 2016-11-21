@@ -13,33 +13,42 @@ class ClassDumper(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self):
+    def __init__(self, output_file):
         self.base_types = ['int', 'double', 'float', 'unsigned int']
         self.base_types = self.base_types + \
         [e + ' *' for e in self.base_types] + \
         [e + ' &' for e in self.base_types]
 
-    def dump(self, class_file, classes=None, **dummy_kwargs):
+        self.output_file = output_file
+
+    def dump(self, class_file=None, classes=None, **dummy_kwargs):
 
         " perform the dump "
 
-        cls_reader = ClassReader()
-        _classes = cls_reader.read(class_file)
+
+        fout = open(self.output_file, 'w')
+
+        classes = []
+
+        if class_file is not None:
+            cls_reader = ClassReader()
+            classes = cls_reader.read(class_file)
+
         sstr = ""
-        for _class in _classes:
+        for _class in classes:
             if classes is None:
                 condition = True
             else:
                 condition = (_class.name in classes)
             if condition:
-                sstr += self.dump_file(_class)
+                sstr += self.dump_class(_class, fout)
             else:
                 print "ignore class '{0}'".format(_class.name)
 
         return sstr
 
     @abstractmethod
-    def dump_file(self, _class):
+    def dump_class(self, _class, _file):
 
         " formats the provided class as a string: abstract method "
 
