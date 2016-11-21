@@ -1,5 +1,5 @@
 class Animal
-  public virtual void scream()=0;
+  public pure virtual void scream();
   public std::string getName(); 
   protected std::string name;
 
