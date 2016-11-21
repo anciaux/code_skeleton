@@ -15,7 +15,7 @@ class Typename(object):
 
 ################################################################
 
-class Method:
+class Method(object):
 
     " Describes a method "
     def __init__(self, name, args, ret, encapsulation,
@@ -25,8 +25,7 @@ class Method:
         self.virtual = virtual
         self.static = static
         self.args = dict()
-        for k, v in args:
-            self.args[v] = k
+        self.args.update(args)
         self.ret = ret
         self.encapsulation = encapsulation
         if self.encapsulation == '':
@@ -62,6 +61,9 @@ class Method:
 ################################################################
 
 class Member(object):
+
+    " Descriptor of a method "
+
     def __init__(self, name, _type, encapsulation, static, comments):
         self.name = name
         self.type = _type
@@ -80,6 +82,8 @@ class Member(object):
 
 class ClassDescriptor(object):
 
+    " Describe a class "
+
     def __init__(self, name, inheritance=None):
         self.name = name
         self.inheritance = inheritance
@@ -89,26 +93,42 @@ class ClassDescriptor(object):
 
     def add_method(self, name, args, ret, encapsulation,
                    virtual, static, const, comments):
+
+        " append a method to the class "
+
         new_method = Method(name, args, ret, encapsulation, virtual, static, const, comments)
         if name not in self.methods[encapsulation]:
             self.methods[encapsulation][name] = set()
         self.methods[encapsulation][name].add(new_method)
 
     def add_member(self, name, _type, encapsulation, static, comments):
+
+        " append a member to the class "
+
         new_member = Member(name, _type, encapsulation, static, comments)
         self.members[encapsulation][name] = new_member
 
     def add_type(self, name, encapsulation):
+
+        " add a type to the list of typenames "
+
         new_type = Typename(name, encapsulation)
         self.types[encapsulation][name] = new_type
 
     def get_members(self, encapsulation=None):
+
+        " return the members "
+
         return self.members[encapsulation]
 
-    def getTypes(self, encapsulation=None):
+    def get_types(self, encapsulation=None):
+
+        " return the typenames "
         return self.types[encapsulation]
 
-    def getMethods(self, encapsulation=None):
+    def get_methods(self, encapsulation=None):
+
+        " return the methods "
         return self.methods[encapsulation]
 
     def __str__(self):
