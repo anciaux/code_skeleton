@@ -1,124 +1,150 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-
+" Module used to produces a GraphViz (.dot) file "
+################################################################
 from class_dumper import ClassDumper
+################################################################
 
-def protectStr(string):
-    return string.replace('<','\<').replace('>','\>')
+def _protect_str(string):
+    return string.replace('<', r'\<').replace('>', r'\>')
 
 
 class ClassDumperDOT(ClassDumper):
-    def __init__(self,inheritance_flag=True, colaboration_flag=True):
+
+    def __init__(self, output_file,
+                 inheritance_flag=True,
+                 colaboration_flag=True):
+
         ClassDumper.__init__(self)
-        self.encaps_symbol = {'public':'+','private':'-','protected':'#'} 
-        self.inheritance_flag  = inheritance_flag
+        self.encaps_symbol = {'public':'+', 'private':'-', 'protected':'#'}
+        self.inheritance_flag = inheritance_flag
         self.colaboration_flag = colaboration_flag
-        
-    def dump(self,class_file,output_filename,**kwargs):
+        self.output_file = output_file
+
+    def dump_classes(self, classes):
+
+        fout = open(self.output_file, 'w')
+
         sstr = 'digraph "test"\n{'
         sstr += """
-edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"]; 
+edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
 node [fontname="Helvetica",fontsize="10",shape=record];
 """
 
-        sstr += ClassDumper.dump(self,class_file,**kwargs)
-        sstr += "}"
+        fout.write(sstr)
 
-        with open(output_filename,'w') as f:
-            f.write(sstr)
-            f.close()
-        
-        
-    def dumpFile(self,c):
-        sstr =  self.formatClassDeclaration(c)
-        sstr += self.formatConstructors(c)
-        sstr += self.formatMethods(c)
-        sstr += self.formatMembers(c)
+        for _class in classes:
+            self.dump_class(_class, fout)
+
+        fout.write("}")
+        fout.close()
+
+
+    def dump_class(self, _class, _file):
+
+        " dumps a class into the provided file "
+
+        sstr = self._format_class_declaration(_class)
+        sstr += self.formatConstructors(_class)
+        sstr += self.formatMethods(_class)
+        sstr += self.formatMembers(_class)
         sstr += '}"];\n'
-        if (self.inheritance_flag): sstr += self.formatInheritance(c)
-        if (self.colaboration_flag): sstr += self.formatCompositions(c)
-                
-        sstr += self.formatTypes(c)
+        if self.inheritance_flag:
+            sstr += self._format_inheritance(_class)
+        if self.colaboration_flag:
+            sstr += self._format_compositions(_class)
+
+        sstr += self.formatTypes(_class)
+        _file.write(sstr)
         return sstr
 
-    def formatClassDeclaration(self,c):
-        sstr = '"{0}" '.format(c.name)
-        sstr += '[label="{' + format(c.name) + "\\n"
+    @classmethod
+    def _format_class_declaration(cls, _class):
+
+        sstr = '"{0}" '.format(_class.name)
+        sstr += '[label="{' + format(_class.name) + "\\n"
         return sstr
 
-    def formatInheritance(self,c):
-        if c.inheritance is not None:
+    @classmethod
+    def _format_inheritance(cls, _class):
+        if _class.inheritance is not None:
             sstr = ""
-            for mother in c.inheritance:
-                sstr += '"{0}" '.format(mother) + " -> " + '"{0}" '.format(c.name)
-                sstr += '[style="solid",color="midnightblue",fontname="Helvetica",arrowtail="onormal",fontsize="10",dir="back"];\n'
+            for mother in _class.inheritance:
+                sstr += '"{0}" '.format(mother) + " -> " + '"{0}" '.format(_class.name)
+                sstr += ('[style="solid",color="midnightblue",fontname="Helvetica"'
+                         ',arrowtail="onormal",fontsize="10",dir="back"];\n')
             return sstr
         return ""
 
 
-        
-    def formatConstructors(self,c):
+
+    def _format_constructors(self, _class):
         sstr = ""
-        for encaps in ['public','private', 'protected']:
-            
-            meths = c.getMethods(encaps)
-            if c.name in meths:
-                if sstr == "":  sstr = "|"
+        for encaps in ['public', 'private', 'protected']:
+
+            meths = _class.getMethods(encaps)
+            if _class.name in meths:
+                if sstr == "":
+                    sstr = "|"
                 sstr += self.encaps_symbol[encaps] + " "
-                for cons in meths[c.name]:
-                    sstr += self.formatMethod(c,cons)
+                for cons in meths[_class.name]:
+                    sstr += self.formatMethod(_class, cons)
                     sstr += "\\l"
-            if '~' + c.name in meths:
-                if sstr == "":  sstr = "|"
+            if '~' + _class.name in meths:
+                if sstr == "":
+                    sstr = "|"
                 sstr += self.encaps_symbol[encaps] + " "
-                for cons in meths['~' + c.name]:
-                    sstr += self.formatMethod(c,cons)
+                for cons in meths['~' + _class.name]:
+                    sstr += self.formatMethod(_class, cons)
                     sstr += "\\l"
 
         return sstr
 
 
-    def formatMethods(self,c):
+    def _format_methods(self, _class):
 
         sstr = ""
 
-        for encaps in ['public','private', 'protected']:
-            
-            meths = c.getMethods(encaps)
-            meths_names = set(meths.keys()) - set([c.name,'~'+c.name])
+        for encaps in ['public', 'private', 'protected']:
+
+            meths = _class.getMethods(encaps)
+            meths_names = set(meths.keys()) - set([_class.name, '~'+ _class.name])
             meths_names = list(meths_names)
             if len(meths_names) is not 0:
-                
-                for n in meths_names:
-                    for m in meths[n]:
-                        if sstr == "":  sstr = "|"
+
+                for _name in meths_names:
+                    for meth in meths[_name]:
+                        if sstr == "":
+                            sstr = "|"
                         sstr += self.encaps_symbol[encaps] + " "
-                        sstr += self.formatMethod(c,m)
+                        sstr += self.formatMethod(_class, meth)
                         sstr += "\\l"
 
         return sstr
 
 
-    def formatMembers(self,c):
+    def _format_members(self, _class):
         sstr = ""
 
-        for encaps in ['public','private', 'protected']:
-            
-            membs = c.getMembers(encaps)
+        for encaps in ['public', 'private', 'protected']:
+
+            membs = _class.getMembers(encaps)
             if len(membs) is not 0:
-                
-                for n,m in membs.iteritems():
-                    if sstr == "":  sstr = "|"
+
+                for dummy_name, memb in membs.iteritems():
+                    if sstr == "":
+                        sstr = "|"
                     sstr += self.encaps_symbol[encaps] + " "
-                    sstr += self.formatMember(c,m)
+                    sstr += self.formatMember(_class, memb)
                     sstr += "\\l"
 
         return sstr
 
-    def formatCompositions(self,c):
+    def _format_compositions(self, _class):
         composition_set = set()
-        for encaps in ['public','private', 'protected']:
-            
+        for encaps in ['public', 'private', 'protected']:
+
             membs = c.getMembers(encaps)
             if len(membs) is not 0:
                 for n,m in membs.iteritems():
@@ -130,7 +156,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             sstr += '"{0}" '.format(t) + " -> " + '"{0}" '.format(c.name)
             sstr += '[style="dashed",color="midnightblue",fontname="Helvetica",arrowtail="odiamond",fontsize="10",dir="back"];\n'
 
-                
+
         return sstr
 
 
@@ -176,14 +202,14 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
 ################################################################
 
-    
+
 import argparse
 import subprocess
 import os
-    
+
 if __name__ == '__main__':
 
-    
+
     parser = argparse.ArgumentParser(description='DOT graph producer for class representation')
     parser.add_argument('--class_file','-c', help='The class file to process',required=True)
     parser.add_argument('--format','-f' , default="pdf", help='The format of the produced graph file')
@@ -191,7 +217,7 @@ if __name__ == '__main__':
     parser.add_argument('--colaboration_no' , action='store_false', help='Disable the collaboration output')
     parser.add_argument('--inheritance_no' , action='store_false', help='Disable the inheritance output')
     parser.add_argument('--classes' , type=str, help='The classes to output')
-    
+
     args = parser.parse_args()
     args = vars(args)
     if args["output"] is None:
@@ -203,7 +229,7 @@ if __name__ == '__main__':
     inheritance_flag = True
     colaboration_flag = True
     if not args['inheritance_no'] : inheritance_flag = False
-    if not args['colaboration_no'] : colaboration_flag = False        
+    if not args['colaboration_no'] : colaboration_flag = False
 
     dumper_class = ClassDumperDOT(inheritance_flag, colaboration_flag)
 
@@ -216,4 +242,3 @@ if __name__ == '__main__':
     option_output = ['-o', args['output'] ]
     option_input  = [dot_file]
     subprocess.call(exe+option_format+option_output+option_input)
-

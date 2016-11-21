@@ -4,7 +4,6 @@
 " Module used to produces a C++ project skeleton "
 ################################################################
 import os
-import re
 import argparse
 from class_dumper import ClassDumper
 ################################################################
