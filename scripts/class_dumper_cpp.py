@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################
 import os
 import argparse
-from class_dumper import ClassDumper
+from code_skeleton.class_dumper import ClassDumper
 ################################################################
 __author__ = "Guillaume Anciaux"
 __copyright__ = "Copyright EPFL"

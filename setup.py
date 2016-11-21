@@ -25,15 +25,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-from setuptools import setup, find_packages
 
+from setuptools import setup
 
 setup(name="code_skeleton",
-      packages=find_packages(),
-      version="0.0.0",
+      packages=['code_skeleton'],
+      version="0.0.1",
       author="Guillaume Anciaux",
       author_email="guillaume.anciaux@epfl.ch",
       description=("Code classes solution and Code generator"),
+      scripts=['scripts/class_dumper_dot.py',
+               'scripts/class_dumper_cpp.py',
+               'scripts/class_dumper_python.py'
+              ],
       license="""
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,5 +51,4 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-""",
-      test_suite="tests")
+""")
