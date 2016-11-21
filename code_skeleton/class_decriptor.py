@@ -72,7 +72,10 @@ class Method(object):
             sstr += self.virtual + " "
 
         sstr += self.ret + " " + self.name + "("
-        pairs = list(self.args.iteritems())
+        try:
+            pairs = list(self.args.iteritems())
+        except Exception as ex:
+            pairs = list(self.args.items())
         pairs = [b + " " + a for a, b in pairs]
         sstr += ", ".join(pairs)
         sstr += ")"
@@ -168,16 +171,34 @@ class ClassDescriptor(object):
             sstr += ",".join(self.inheritance) + "\n"
 
         sstr += "Methods:\n"
-        for encaps, meths in self.methods.iteritems():
+
+        try:
+            _iter = self.methods.iteritems()
+        except Exception as ex:
+            _iter = self.methods.items()
+
+        for encaps, meths in _iter:
             sstr += encaps + ":\n"
-            for dummy_name, m_list in meths.iteritems():
+            try:
+                _iter = meths.iteritems()
+            except Exception as ex:
+                _iter = meths.items()
+            for dummy_name, m_list in _iter:
                 for method in m_list:
                     sstr += str(method) + "\n"
         sstr += "\n"
         sstr += "Members:\n"
-        for encaps, membs in self.members.iteritems():
+        try:
+            _iter1 = self.members.iteritems()
+        except Exception as ex:
+            _iter1 = self.members.items()
+        for encaps, membs in _iter1:
             sstr += encaps + ":\n"
-            for dummy_name, memb in membs.iteritems():
+            try:
+                _iter2 = membs.iteritems()
+            except Exception as ex:
+                _iter2 = membs.items()
+            for dummy_name, memb in _iter2:
                 sstr += str(memb) + "\n"
         return sstr
 

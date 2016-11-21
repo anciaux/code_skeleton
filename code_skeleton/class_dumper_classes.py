@@ -133,7 +133,11 @@ class ClassDumperClasses(ClassDumper):
 
             membs = _class.getMembers(encaps)
             if len(membs) is not 0:
-                for dummy_n, memb in membs.iteritems():
+                try:
+                    _iter = membs.iteritems()
+                except Exception as ex:
+                    _iter = membs.tems()
+                for dummy_n, memb in _iter:
                     sstr += self._format_member(_class, memb)
                     sstr += "\n"
         return sstr
@@ -152,8 +156,14 @@ class ClassDumperClasses(ClassDumper):
             sstr += meth.ret + " "
 
         sstr += meth.name + "("
+
+        try:
+            _iter = meth.args.iteritems()
+        except Exception as ex:
+            _iter = meth.args.items()
+
         sstr += ", ".join([a + " " + b
-                           for b, a in list(meth.args.iteritems())])
+                           for b, a in list(_iter)])
         sstr += ")"
         if meth.const:
             sstr += " const"

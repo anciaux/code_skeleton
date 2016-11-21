@@ -172,7 +172,12 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             membs = _class.get_members(encaps)
             if len(membs) is not 0:
 
-                for dummy_name, memb in membs.iteritems():
+                try:
+                    _iter = membs.iteritems()
+                except Exception as ex:
+                    _iter = membs.items()
+                    
+                for dummy_name, memb in _iter:
                     if sstr == "":
                         sstr = "|"
                     sstr += self.encaps_symbol[encaps] + " "
@@ -187,7 +192,13 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
             membs = _class.get_members(encaps)
             if len(membs) is not 0:
-                for dummy_name, memb in membs.iteritems():
+
+                try:
+                    _iter = membs.iteritems()
+                except Exception as ex:
+                    _iter = membs.items()
+
+                for dummy_name, memb in _iter:
                     if memb.type in self.base_types:
                         continue
                     composition_set.add(self.base_type(memb.type))
@@ -219,7 +230,13 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
     @classmethod
     def _format_method(cls, meth):
-        arg_types = list(meth.args.iteritems())
+
+        try:
+            _iter = meth.args.iteritems()
+        except Exception as ex:
+            _iter = meth.args.items()
+
+        arg_types = list(_iter)
         arg_types = [_protect_str(a) for dummy_b, a in arg_types]
         sstr = ""
         if meth.virtual == 'virtual' or\
