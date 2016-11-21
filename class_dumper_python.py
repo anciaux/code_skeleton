@@ -105,14 +105,14 @@ class {1}: Documentation TODO
         if _class.name in meths:
             for meth in meths[_class.name]:
                 meth.name = "__init__"
-                sstr += self._format_method(_class, meth, pass_flag=False)
+                sstr += self._format_method(meth, pass_flag=False)
                 self._inc_tabulation()
                 sstr += self._format_members(_class)
                 sstr += self._get_tabulation() + "pass\n\n"
                 self._dec_tabulation()
         else:
             meth = Method('__init__', "", "", 'public', '', '', '', 'default constructor')
-            sstr += self._format_method(_class, meth, pass_flag=False)
+            sstr += self._format_method(meth, pass_flag=False)
             self._inc_tabulation()
             sstr += self._format_members(_class)
             sstr += self._get_tabulation() + "pass\n\n"
@@ -121,7 +121,7 @@ class {1}: Documentation TODO
         if '~' + _class.name in meths:
             for meth in meths['~' + _class.name]:
                 meth.name = "__del__"
-                sstr += self._format_method(_class,meth)
+                sstr += self._format_method(meth)
 
 
 
@@ -170,10 +170,10 @@ class {1}: Documentation TODO
 
             membs = _class.getMembers(encaps)
             if len(membs) is not 0:
-                for _name, memb in membs.iteritems():
+                for dummy_name, memb in membs.iteritems():
                     if memb.static == 'static':
                         continue
-                    sstr += self._format_member(_class, memb)
+                    sstr += self._format_member(memb)
                     sstr += "\n"
 
         if sstr != "":
@@ -192,10 +192,10 @@ class {1}: Documentation TODO
 
             membs = _class.getMembers(encaps)
             if len(membs) is not 0:
-                for _name, memb in membs.iteritems():
+                for dummy_name, memb in membs.iteritems():
                     if not memb.static == 'static':
                         continue
-                    sstr += self.formatStaticMember(_class, memb)
+                    sstr += self._format_static_member(memb)
                     sstr += "\n"
 
         if sstr != "":
