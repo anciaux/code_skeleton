@@ -22,13 +22,16 @@ class ClassDumperDOT(ClassDumper):
                  inheritance_flag=True,
                  colaboration_flag=True):
 
+        if not isinstance(output_file, str):
+            raise Exception('invalid filename: {0}'.format(output_file))
+
         ClassDumper.__init__(self)
         self.encaps_symbol = {'public': '+', 'private': '-', 'protected': '#'}
         self.inheritance_flag = inheritance_flag
         self.colaboration_flag = colaboration_flag
         self.output_file = output_file
 
-    def dump_classes(self, classes):
+    def dump_classes(self, classes, **kwargs):
 
         fout = open(self.output_file, 'w')
 
@@ -52,16 +55,16 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         " dumps a class into the provided file "
 
         sstr = self._format_class_declaration(_class)
-        sstr += self.formatConstructors(_class)
-        sstr += self.formatMethods(_class)
-        sstr += self.formatMembers(_class)
+        sstr += self._format_constructors(_class)
+        sstr += self._format_methods(_class)
+        sstr += self._format_members(_class)
         sstr += '}"];\n'
         if self.inheritance_flag:
             sstr += self._format_inheritance(_class)
         if self.colaboration_flag:
             sstr += self._format_compositions(_class)
 
-        sstr += self.formatTypes(_class)
+        sstr += self._format_types(_class)
         _file.write(sstr)
         return sstr
 
@@ -77,8 +80,8 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         if _class.inheritance is not None:
             sstr = ""
             for mother in _class.inheritance:
-                sstr += '"{0}" '.format(mother) + " -> "
-                + '"{0}" '.format(_class.name)
+                sstr += ('"{0}" '.format(mother) + " -> "
+                         '"{0}" '.format(_class.name))
                 sstr += ('[style="solid",color="midnightblue",'
                          'fontname="Helvetica"'
                          ',arrowtail="onormal",fontsize="10",dir="back"];\n')
@@ -89,13 +92,13 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         sstr = ""
         for encaps in ['public', 'private', 'protected']:
 
-            meths = _class.getMethods(encaps)
+            meths = _class.get_methods(encaps)
             if _class.name in meths:
                 if sstr == "":
                     sstr = "|"
                 sstr += self.encaps_symbol[encaps] + " "
                 for cons in meths[_class.name]:
-                    sstr += self.formatMethod(_class, cons)
+                    sstr += self._format_method(_class, cons)
                     sstr += "\\l"
             if '~' + _class.name in meths:
                 if sstr == "":
@@ -113,7 +116,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
         for encaps in ['public', 'private', 'protected']:
 
-            meths = _class.getMethods(encaps)
+            meths = _class.get_methods(encaps)
             meths_names = set(meths.keys()) - set([_class.name, '~'
                                                    + _class.name])
             meths_names = list(meths_names)
@@ -124,7 +127,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
                         if sstr == "":
                             sstr = "|"
                         sstr += self.encaps_symbol[encaps] + " "
-                        sstr += self.formatMethod(_class, meth)
+                        sstr += self._format_method(_class, meth)
                         sstr += "\\l"
 
         return sstr
@@ -134,14 +137,14 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
         for encaps in ['public', 'private', 'protected']:
 
-            membs = _class.getMembers(encaps)
+            membs = _class.get_members(encaps)
             if len(membs) is not 0:
 
                 for dummy_name, memb in membs.iteritems():
                     if sstr == "":
                         sstr = "|"
                     sstr += self.encaps_symbol[encaps] + " "
-                    sstr += self.formatMember(_class, memb)
+                    sstr += self._format_member(_class, memb)
                     sstr += "\\l"
 
         return sstr
@@ -150,12 +153,12 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         composition_set = set()
         for encaps in ['public', 'private', 'protected']:
 
-            membs = _class.getMembers(encaps)
+            membs = _class.get_members(encaps)
             if len(membs) is not 0:
                 for _name, memb in membs.iteritems():
                     if memb.type in self.base_types:
                         continue
-                    composition_set.add(self.baseType(memb.type))
+                    composition_set.add(self.base_type(memb.type))
 
         sstr = ""
         for t in composition_set:
@@ -219,7 +222,7 @@ def main():
                         help='Disable the collaboration output')
     parser.add_argument('--inheritance_no', action='store_false',
                         help='Disable the inheritance output')
-    parser.add_argument('--classes', type=str,
+    parser.add_argument('--class_filter', type=str,
                         help='The classes to output')
 
     args = parser.parse_args()
@@ -228,8 +231,8 @@ def main():
         args['output'] = os.path.splitext(args['class_file'])[0] +\
                          "." + args['format']
 
-    if args["classes"] is not None:
-        args["classes"] = args["classes"].split(',')
+    if args["class_filter"] is not None:
+        args["class_filter"] = args["class_filter"].split(',')
 
     inheritance_flag = True
     colaboration_flag = True
@@ -241,7 +244,8 @@ def main():
     class_file = args['class_file']
     del args['class_file']
     dot_file = os.path.splitext(class_file)[0] + ".dot"
-    dumper_class = ClassDumperDOT(inheritance_flag, colaboration_flag, dot_file)
+    dumper_class = ClassDumperDOT(dot_file, inheritance_flag,
+                                  colaboration_flag)
     dumper_class.dump(class_file, **args)
     exe = ['dot']
     option_format = ['-T'+args['format']]

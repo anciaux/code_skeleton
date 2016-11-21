@@ -38,9 +38,10 @@ class ClassDumper(object):
         classes = []
 
         for _class in _all_classes:
-            if classes is None:
+            if not self.selected_classes:
                 condition = True
             else:
+                print (self.selected_classes)
                 condition = (_class.name in self.selected_classes)
             if condition:
                 classes.append(_class)
@@ -50,7 +51,7 @@ class ClassDumper(object):
         self.dump_classes(classes, **kwargs)
 
     @abstractmethod
-    def dump_classes(self, classes):
+    def dump_classes(self, classes, **kwargs):
 
         " formats the provided class as a string: abstract method "
 
