@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+" Module to dump a classes file "
+
 ################################################################
 import argparse
 from class_dumper import ClassDumper

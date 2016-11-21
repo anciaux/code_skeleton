@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-" Module used to produces a C++ project ready to use with CMake/Makfiles "
+" Module used to produces a C++ project skeleton "
 ################################################################
 import os
 import re
@@ -89,15 +89,6 @@ int main(int argc, char ** argv){
   return EXIT_FAILURE;
 }""")
 
-    @classmethod
-    def _make_base_filename(cls, class_name):
-        name = re.sub(r'([0-9]|[A-Z0-9])', r'_\g<1>', class_name)
-        name = name.lower()
-
-        if name[0] == '_':
-            name = name[1:]
-        return name
-
     def _dump_header(self, _class):
 
         basename = self._make_base_filename(_class.name)
@@ -125,7 +116,7 @@ int main(int argc, char ** argv){
                     #         for name,m in membs.iteritems():
                     #             if m.type in self.base_types: continue
                     #             f.write("#include \"" +
-                    #              self.makeBaseFilename(self.baseType(m.type)) + ".hh\"\n")
+                    #              self.make_base_filename(self.baseType(m.type)) + ".hh\"\n")
             _file.write(sstr)
             _file.write("\n/* " + '-'*74 + " */\n")
             _file.write("#endif //__" + basename.upper() + "__HH__\n")
@@ -211,7 +202,7 @@ int main(int argc, char ** argv){
 
                 for _name in meths_names:
                     for meth in meths[_name]:
-                        sstr += self.formatMethod(_class, meth)
+                        sstr += self._format_method(_class, meth)
                 sstr += "\n"
 
         if not sstr == "" and self.stage == 'header':

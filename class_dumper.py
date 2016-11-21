@@ -4,6 +4,7 @@
 " Mother class for all class dumpers "
 ################################################################
 from __future__ import print_function
+import re
 from abc import ABCMeta, abstractmethod
 from class_reader import ClassReader
 ################################################################
@@ -64,3 +65,13 @@ class ClassDumper(object):
         temp_type = temp_type.replace('*', '')
         temp_type = temp_type.strip()
         return temp_type
+
+    @classmethod
+    def _make_base_filename(cls, class_name):
+        name = re.sub(r'([0-9]|[A-Z0-9])', r'_\g<1>', class_name)
+        name = name.lower()
+
+        if name[0] == '_':
+            name = name[1:]
+        return name
+
