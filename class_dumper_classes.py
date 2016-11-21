@@ -27,6 +27,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import argparse
 from class_dumper import ClassDumper
 ################################################################
+__author__ = "Guillaume Anciaux"
+__copyright__ = "Copyright EPFL"
+__credits__ = ["Guillaume Anciaux"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Guillaume Anciaux"
+__email__ = "guillaume.anciaux@epfl.ch"
+__status__ = "Beta"
+################################################################
 
 class ClassDumperClasses(ClassDumper):
     " Class emplyed to output to classes text format "

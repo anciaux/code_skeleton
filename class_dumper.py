@@ -22,12 +22,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+
 ################################################################
 from __future__ import print_function
 import re
 from abc import ABCMeta, abstractmethod
 from class_reader import ClassReader
 ################################################################
+__author__ = "Guillaume Anciaux"
+__copyright__ = "Copyright EPFL"
+__credits__ = ["Guillaume Anciaux"]
+__license__ = "GPL"
+__version__ = "1.0.0"
+__maintainer__ = "Guillaume Anciaux"
+__email__ = "guillaume.anciaux@epfl.ch"
+__status__ = "Beta"
+################################################################
+
 
 class ClassDumper(object):
 
