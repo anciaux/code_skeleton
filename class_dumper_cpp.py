@@ -1,32 +1,40 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+" Module used to produces a C++ project ready to use with CMake/Makfiles "
+################################################################
+import os
+import re
+import argparse
 from class_dumper import ClassDumper
-from class_reader import ClassReader
-import os, re 
+################################################################
 
 class ClassDumperCPP(ClassDumper):
-    def __init__(self,output_dir):
-        ClassDumper.__init__(self)
-        self.output_dir = output_dir
-        
-    def dump(self,class_file,make_system="cmake"):
-        cls_reader = ClassReader()
-        classes = cls_reader.read(class_file)
-        for c in classes:
-            self.dumpHeader(c)
-            self.dumpCCFile(c)
 
-        self.dumpMain()
-        self.dumpMakefile(classes)
-        self.dumpCMake(classes)
+    " Produces a C++ project ready to use with CMake/Makfiles "
+
+    def __init__(self, output_dir, **kwargs):
+        ClassDumper.__init__(self, **kwargs)
+        self.output_dir = output_dir
+        self.stage = None
+
+    def dump_classes(self, classes):
+
+        for _class in classes:
+            self._dump_header(_class)
+            self._dump_cc_file(_class)
+
+        self._dump_main()
+        self._dump_makefile(classes)
+        self._dump_cmake(classes)
 
         return ""
 
-    def dumpMakefile(self,classes):
-        make_filename = os.path.join(self.output_dir,'Makefile')
-        CC_files     = [self.makeBaseFilename(c.name)+ ".cc" for c in classes]
-        obj_files    = [self.makeBaseFilename(c.name)+ ".o" for c in classes]
-        header_files = [self.makeBaseFilename(c.name)+ ".hh" for c in classes]
+    def _dump_makefile(self, classes):
+        make_filename = os.path.join(self.output_dir, 'Makefile')
+        cc_files = [self._make_base_filename(c.name) + ".cc" for c in classes]
+        obj_files = [self._make_base_filename(c.name) + ".o" for c in classes]
+        header_files = [self._make_base_filename(c.name) + ".hh" for c in classes]
         sstr = """
 CXXFLAGS=-g -Wall
 CC_FILES     = {0}
@@ -44,38 +52,36 @@ $(EXEC): $(OBJ_FILES) main.o
 clean:
 \trm -f *.o *~ $(EXEC)
 
-""".format(" ".join(CC_files)," ".join(obj_files)," ".join(header_files))
+""".format(" ".join(cc_files), " ".join(obj_files), " ".join(header_files))
 
-        with open(make_filename,'w') as f:
-            f.write(sstr)
+        with open(make_filename, 'w') as _file:
+            _file.write(sstr)
 
-    def dumpCMake(self,classes):
-        make_filename = os.path.join(self.output_dir,'CMakeLists.txt')
-        CC_files     = [self.makeBaseFilename(c.name)+ ".cc" for c in classes]
-        obj_files    = [self.makeBaseFilename(c.name)+ ".o" for c in classes]
-        header_files = [self.makeBaseFilename(c.name)+ ".hh" for c in classes]
+    def _dump_cmake(self, classes):
+        make_filename = os.path.join(self.output_dir, 'CMakeLists.txt')
+        cc_files = [self._make_base_filename(c.name) + ".cc" for c in classes]
 
         sstr = """
 cmake_minimum_required (VERSION 2.6)
 project (GeneratedFromCodeGenerator)
 
-add_executable(main 
-main.cc 
+add_executable(main
+main.cc
 {0})
-""".format("\n".join(CC_files))
+""".format("\n".join(cc_files))
 
-        with open(make_filename,'w') as f:
-            f.write(sstr)
+        with open(make_filename, 'w') as _file:
+            _file.write(sstr)
 
 
-    def dumpMain(self):
-        main_filename   = os.path.join(self.output_dir,"main.cc")
-        with open(main_filename,'w') as f:
-            f.write("""
+    def _dump_main(self):
+        main_filename = os.path.join(self.output_dir, "main.cc")
+        with open(main_filename, 'w') as _file:
+            _file.write("""
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-            
+
 int main(int argc, char ** argv){
 
 /// ... your code here ...
@@ -83,124 +89,129 @@ int main(int argc, char ** argv){
   return EXIT_FAILURE;
 }""")
 
-    def makeBaseFilename(self,class_name):
-        name = re.sub(r'([0-9]|[A-Z0-9])','_\g<1>',class_name)
+    @classmethod
+    def _make_base_filename(cls, class_name):
+        name = re.sub(r'([0-9]|[A-Z0-9])', r'_\g<1>', class_name)
         name = name.lower()
-        
+
         if name[0] == '_':
             name = name[1:]
         return name
-        
-    def dumpHeader(self,c):
 
-        basename = self.makeBaseFilename(c.name)
-        header_filename = os.path.join(self.output_dir,basename+".hh")
-        
+    def _dump_header(self, _class):
+
+        basename = self._make_base_filename(_class.name)
+        header_filename = os.path.join(self.output_dir, basename+".hh")
+
         self.stage = 'header'
-        sstr =  self.formatClassDeclaration(c)
-        sstr += self.formatConstructors(c)
-        sstr += self.formatMethods(c)
-        sstr += self.formatMembers(c)
-        sstr += "};\n" 
+        sstr = self._format_class_declaration(_class)
+        sstr += self._format_constructors(_class)
+        sstr += self._format_methods(_class)
+        sstr += self._format_members(_class)
+        sstr += "};\n"
 
-        with open(header_filename,'w') as f:
-#            print header_filename
-            f.write("#ifndef __" + basename.upper() + "__HH__\n")
-            f.write("#define __" + basename.upper() + "__HH__\n\n")
-            f.write("/* -------------------------------------------------------------------------- */\n")
+        with open(header_filename, 'w') as _file:
+            # print header_filename
+            _file.write("#ifndef __" + basename.upper() + "__HH__\n")
+            _file.write("#define __" + basename.upper() + "__HH__\n\n")
+            _file.write("/* " + '-'*74 + " */\n")
 
-            if c.inheritance is not None:
-                for herit in c.inheritance:
-                    f.write("#include \"" + self.makeBaseFilename(herit) + ".hh\"\n")                
+            if _class.inheritance is not None:
+                for herit in _class.inheritance:
+                    _file.write("#include \"" + self._make_base_filename(herit) + ".hh\"\n")
 
-#            if c.members is not None:
-#                for encaps,membs in c.members.iteritems():
-#                    for name,m in membs.iteritems():
-#                        if m.type in self.base_types: continue
-#                        f.write("#include \"" + self.makeBaseFilename(self.baseType(m.type)) + ".hh\"\n")                
-#
-            f.write(sstr)
-            f.write("\n/* -------------------------------------------------------------------------- */\n")
-            f.write("#endif //__" + basename.upper() + "__HH__\n")
+                    # if c.members is not None:
+                    #     for encaps,membs in c.members.iteritems():
+                    #         for name,m in membs.iteritems():
+                    #             if m.type in self.base_types: continue
+                    #             f.write("#include \"" +
+                    #              self.makeBaseFilename(self.baseType(m.type)) + ".hh\"\n")
+            _file.write(sstr)
+            _file.write("\n/* " + '-'*74 + " */\n")
+            _file.write("#endif //__" + basename.upper() + "__HH__\n")
 
 
-            
 
-    def dumpCCFile(self,c):
 
-        basename = self.makeBaseFilename(c.name)
-        CC_filename = os.path.join(self.output_dir,basename+".cc")
-        header_filename = os.path.join(self.output_dir,basename+".hh")
+    def _dump_cc_file(self, _class):
+
+        basename = self._make_base_filename(_class.name)
+        cc_filename = os.path.join(self.output_dir, basename+".cc")
+        header_filename = os.path.join(self.output_dir, basename+".hh")
 
         self.stage = 'CC'
-        sstr = self.formatConstructors(c)
-        sstr += self.formatMethods(c)
+        sstr = self._format_constructors(_class)
+        sstr += self._format_methods(_class)
 
-        with open(CC_filename,'w') as f:
-#            print CC_filename
-            f.write("#include \"" + os.path.basename(header_filename) + "\"\n")
-            f.write("/* -------------------------------------------------------------------------- */\n\n")
-            f.write(sstr)
+        with open(cc_filename, 'w') as _file:
+            # print CC_filename
+            _file.write("#include \"" + os.path.basename(header_filename) + "\"\n")
+            _file.write('/* ' + '-'*74 + ' */\n\n')
+            _file.write(sstr)
 
-    def formatClassDeclaration(self,c):
+    @classmethod
+    def _format_class_declaration(cls, _class):
         sstr = """
 /**
   * Documentation TODO
   */
-  
-"""
-  
-        sstr += "class " + c.name
 
-        if c.inheritance is not None:
-            sstr += ": public " + ", public ".join(c.inheritance)
-            
+"""
+
+        sstr += "class " + _class.name
+
+        if _class.inheritance is not None:
+            sstr += ": public " + ", public ".join(_class.inheritance)
+
         sstr += "{\n"
         return sstr
 
 
-        
-    def formatConstructors(self,c):
+
+    def _format_constructors(self, _class):
         sstr = ""
 
-        for encaps in ['public','private', 'protected']:
-            
-            meths = c.getMethods(encaps)
-            if c.name in meths:
-                if self.stage == 'header': sstr += encaps + ':\n\n'
-                for m in meths[c.name]:
-                    sstr += self.formatMethod(c,m)
-            if '~' + c.name in meths:
-                if self.stage == 'header' and sstr == "": sstr += encaps + ':\n\n'
-                for m in meths['~' + c.name]:
-                    sstr += self.formatMethod(c,m)
-        
+        for encaps in ['public', 'private', 'protected']:
 
-        if not sstr == "" and self.stage == 'header': 
+            meths = _class.getMethods(encaps)
+            if _class.name in meths:
+                if self.stage == 'header':
+                    sstr += encaps + ':\n\n'
+                for meth in meths[_class.name]:
+                    sstr += self._format_method(_class, meth)
+            if '~' + _class.name in meths:
+                if self.stage == 'header' and sstr == "":
+                    sstr += encaps + ':\n\n'
+                for meth in meths['~' + _class.name]:
+                    sstr += self._format_method(_class, meth)
+
+
+        if not sstr == "" and self.stage == 'header':
             sstr = """
   /* ------------------------------------------------------------------------ */
   /* Constructors/Destructors                                                 */
   /* ------------------------------------------------------------------------ */
 
-""" + sstr 
+""" + sstr
 
         return sstr
 
 
-    def formatMethods(self,c):
+    def _format_methods(self, _class):
         sstr = ""
 
-        for encaps in ['public','private', 'protected']:
-            
-            meths = c.getMethods(encaps)
-            meths_names = set(meths.keys()) - set([c.name,'~'+c.name])
+        for encaps in ['public', 'private', 'protected']:
+
+            meths = _class.getMethods(encaps)
+            meths_names = set(meths.keys()) - set([_class.name, '~' + _class.name])
             meths_names = list(meths_names)
             if len(meths_names) is not 0:
-                if self.stage == 'header': sstr += encaps + ':\n\n'
+                if self.stage == 'header':
+                    sstr += encaps + ':\n\n'
 
-                for n in meths_names:
-                    for m in meths[n]:
-                        sstr += self.formatMethod(c,m)
+                for _name in meths_names:
+                    for meth in meths[_name]:
+                        sstr += self.formatMethod(_class, meth)
                 sstr += "\n"
 
         if not sstr == "" and self.stage == 'header':
@@ -214,17 +225,18 @@ int main(int argc, char ** argv){
         return sstr
 
 
-    def formatMembers(self,c):
+    def _format_members(self, _class):
         sstr = ""
 
-        for encaps in ['public','private', 'protected']:
-            
-            membs = c.getMembers(encaps)
-            if len(membs) is not 0:
-                if self.stage == 'header': sstr += encaps + ':\n\n'
+        for encaps in ['public', 'private', 'protected']:
 
-                for n,m in membs.iteritems():
-                    sstr += self.formatMember(c,m)
+            membs = _class.getMembers(encaps)
+            if len(membs) is not 0:
+                if self.stage == 'header':
+                    sstr += encaps + ':\n\n'
+
+                for dummy_name, memb in membs.iteritems():
+                    sstr += self._format_member(memb)
                 sstr += "\n"
 
         if not sstr == "" and self.stage == 'header':
@@ -239,52 +251,62 @@ int main(int argc, char ** argv){
 
 
 
-    def formatMethod(self,c,m):
+    def _format_method(self, _class, meth):
 
         if self.stage == 'header':
-            sstr =  "  //! Documentation TODO\n"
+            sstr = "  //! Documentation TODO\n"
             sstr += "  "
 
-            if m.static: sstr += m.static + " "
-            if m.virtual in ['virtual','pure virtual']:
+            if meth.static:
+                sstr += meth.static + " "
+            if meth.virtual in ['virtual', 'pure virtual']:
                 sstr += "virtual "
-            if (not m.ret == ""): sstr += m.ret + " "
-            sstr += m.name + "("
-            sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
-            sstr +=  ")"
-            if m.virtual == 'pure virtual': sstr += "=0"
+            if not meth.ret == "":
+                sstr += meth.ret + " "
+            sstr += meth.name + "("
+            sstr += ", ".join([a + " " + b
+                               for b, a in list(meth.args.iteritems())])
+            sstr += ")"
+            if meth.virtual == 'pure virtual':
+                sstr += "=0"
             sstr += ";\n"
 
         if self.stage == 'CC':
             sstr = ""
-            if m.virtual == 'pure virtual': return ""
+            if meth.virtual == 'pure virtual':
+                return ""
 
-            sstr += m.ret + " " + c.name + "::" + m.name + "("
-            sstr += ", ".join([a + " " + b for b,a in list(m.args.iteritems())])
-            sstr +=  "){\n\n}\n\n"
+            sstr += meth.ret + " " + _class.name + "::" + meth.name + "("
+            sstr += ", ".join([a + " " + b
+                               for b, a in list(meth.args.iteritems())])
+            sstr += "){\n\n}\n\n"
             sstr += "\n"
             sstr += """
 /* --------------------------------------------------------------------------- */
 
 """
 
-            
+
         return sstr
 
-    def formatMember(self,c,m):
+    @classmethod
+    def _format_member(cls, memb):
         sstr = "  //!Documentation TODO\n"
         sstr += "  "
-        if m.static == 'static': sstr += 'static '
-        sstr += m.type + " " + m.name + ";\n"
+        if memb.static == 'static':
+            sstr += 'static '
+        sstr += memb.type + " " + memb.name + ";\n"
         return sstr
 
-import argparse
-    
-if __name__ == '__main__':
+
+################################################################
+
+def main():
 
     parser = argparse.ArgumentParser(description='CPP project producer for class representation')
-    parser.add_argument('--class_file','-c', help='The class file to process',required=True)
-    parser.add_argument('--output_dir','-o' , help='The directory where to put produced files',required=True)
+    parser.add_argument('--class_file', '-c', help='The class file to process', required=True)
+    parser.add_argument('--output_dir', '-o',
+                        help='The directory where to put produced files', required=True)
 
     args = parser.parse_args()
     args = vars(args)
@@ -292,3 +314,7 @@ if __name__ == '__main__':
     dumper_class = ClassDumperCPP(args['output_dir'])
 
     dumper_class.dump(args['class_file'])
+
+
+if __name__ == '__main__':
+    main()

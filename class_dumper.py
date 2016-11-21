@@ -3,6 +3,7 @@
 
 " Mother class for all class dumpers "
 ################################################################
+from __future__ import print_function
 from abc import ABCMeta, abstractmethod
 from class_reader import ClassReader
 ################################################################
@@ -13,42 +14,43 @@ class ClassDumper(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, output_file):
+    def __init__(self, selected_classes=None):
         self.base_types = ['int', 'double', 'float', 'unsigned int']
         self.base_types = self.base_types + \
         [e + ' *' for e in self.base_types] + \
         [e + ' &' for e in self.base_types]
 
-        self.output_file = output_file
+        self.selected_classes = selected_classes
+        if self.selected_classes is None:
+            self.selected_classes = []
 
-    def dump(self, class_file=None, classes=None, **dummy_kwargs):
+    def dump(self, class_file=None):
 
         " perform the dump "
 
-
-        fout = open(self.output_file, 'w')
-
-        classes = []
+        _all_classes = []
 
         if class_file is not None:
             cls_reader = ClassReader()
-            classes = cls_reader.read(class_file)
+            _all_classes = cls_reader.read(class_file)
 
-        sstr = ""
-        for _class in classes:
+
+        classes = []
+
+        for _class in _all_classes:
             if classes is None:
                 condition = True
             else:
-                condition = (_class.name in classes)
+                condition = (_class.name in self.selected_classes)
             if condition:
-                sstr += self.dump_class(_class, fout)
+                classes.append(_class)
             else:
-                print "ignore class '{0}'".format(_class.name)
+                print("ignore class '{0}'".format(_class.name))
 
-        return sstr
+        self.dump_classes(classes)
 
     @abstractmethod
-    def dump_class(self, _class, _file):
+    def dump_classes(self, classes):
 
         " formats the provided class as a string: abstract method "
 

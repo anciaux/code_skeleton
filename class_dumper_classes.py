@@ -8,10 +8,19 @@ from class_dumper import ClassDumper
 class ClassDumperClasses(ClassDumper):
     " Class emplyed to output to classes text format "
 
-    def __init__(self, output_file):
-        ClassDumper.__init__(self, output_file)
+    def __init__(self, output_file, **kwargs):
+        ClassDumper.__init__(self, **kwargs)
         self.output_file = output_file
         self.nb_tabulation = 0
+
+
+    def dump_classes(self, classes):
+
+        " dumps classes "
+
+        fout = open(self.output_file, 'w')
+        for _class in classes:
+            self.dump_class(_class, fout)
 
     def dump_class(self, _class, _file):
 
