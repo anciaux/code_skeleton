@@ -6,13 +6,14 @@
 import argparse
 import subprocess
 import os
-
 from class_dumper import ClassDumper
 ################################################################
 
 
 def _protect_str(string):
     return string.replace('<', r'\<').replace('>', r'\>')
+
+################################################################
 
 
 class ClassDumperDOT(ClassDumper):
@@ -248,6 +249,7 @@ def main():
     option_output = ['-o', args['output']]
     option_input = [dot_file]
     subprocess.call(exe+option_format+option_output+option_input)
+
 
 if __name__ == '__main__':
     main()
