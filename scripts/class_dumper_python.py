@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import print_function
 import os
 import argparse
-from code_skeleton.class_dumper    import ClassDumper
+from code_skeleton.class_dumper import ClassDumper
 from code_skeleton.class_decriptor import Method
 ################################################################
 __author__ = "Guillaume Anciaux"
@@ -67,24 +67,26 @@ class ClassDumperPython(ClassDumper):
 
 " todo:: documentation for module containing class {0}"
 
+##########################################################################
 from __future__ import print_function
+##########################################################################
+
 """
                     .format(_class.name))
         imports_list = []
         if _class.inheritance is not None:
             imports_list = ["from " + self._make_base_filename(i)
-                            + " import *" for i in _class.inheritance]
+                            + " import " + i  for i in _class.inheritance]
         imports = "\n".join(imports_list)
-        _file.write("#"*74 + "\n")
-        _file.write(imports)
-        _file.write("#"*74 + "\n")
+        if imports:
+            _file.write("#"*74 + "\n")
+            _file.write(imports)
+            _file.write("\n" + "#"*74 + "\n\n")
         self._dump_class(_class, _file)
         _file.write("""
 
-
 if __name__ == '__main__':
-        test = {0}()
-
+    test = {0}()
 """
                     .format(_class.name))
 
@@ -107,8 +109,7 @@ class {1}: Documentation TODO
         sstr += "\n"
         self._dec_tabulation()
 
-        _file.write("#"*74 + '\n')
-
+        _file.write("\n")
         _file.write(sstr)
         _file.write("#"*74 + '\n')
 
@@ -118,18 +119,18 @@ class {1}: Documentation TODO
 
         if _class.inheritance is not None:
             sstr += "(" + ", ".join(_class.inheritance) + ")"
+        else:
+            sstr += "(object)"
 
         sstr += ":\n"
         return sstr
-
-
 
     def _format_constructors(self, _class):
         sstr = ""
 
         meths = {}
         for encaps in ['public', 'private', 'protected']:
-            meths.update(_class.getMethods(encaps))
+            meths.update(_class.get_methods(encaps))
 
         if _class.name in meths:
             for meth in meths[_class.name]:
@@ -137,14 +138,15 @@ class {1}: Documentation TODO
                 sstr += self._format_method(meth, pass_flag=False)
                 self._inc_tabulation()
                 sstr += self._format_members(_class)
-                sstr += self._get_tabulation() + "pass\n\n"
+                sstr += self._get_tabulation() + "pass\n"
                 self._dec_tabulation()
         else:
-            meth = Method('__init__', "", "", 'public', '', '', '', 'default constructor')
+            meth = Method('__init__', "", "", 'public', '', '', '',
+                          'default constructor')
             sstr += self._format_method(meth, pass_flag=False)
             self._inc_tabulation()
             sstr += self._format_members(_class)
-            sstr += self._get_tabulation() + "pass\n\n"
+            sstr += self._get_tabulation() + "pass\n"
             self._dec_tabulation()
 
         if '~' + _class.name in meths:
@@ -152,44 +154,41 @@ class {1}: Documentation TODO
                 meth.name = "__del__"
                 sstr += self._format_method(meth)
 
-
-
         if sstr != "":
             sstr = """
-{0}## ------------------------------------------------------------------ ##
-{0}## Constructors/Destructors                                           ##
-{0}## ------------------------------------------------------------------ ##
+{0}# ------------------------------------------------------------------ #
+{0}# Constructors/Destructors                                           #
+{0}# ------------------------------------------------------------------ #
 
 """.format(self._get_tabulation()) + sstr
 
         return sstr
-
 
     def _format_methods(self, _class):
         sstr = ""
 
         for encaps in ['public', 'private', 'protected']:
 
-            meths = _class.getMethods(encaps)
-            meths_names = set(meths.keys()) - set([_class.name, '~'+_class.name])
+            meths = _class.get_methods(encaps)
+            meths_names = set(meths.keys()) - set([_class.name,
+                                                   '~'+_class.name])
             meths_names = list(meths_names)
             if len(meths_names) is not 0:
                 sstr += self._get_tabulation() + "# " + encaps + ":\n\n"
                 for _name in meths_names:
                     for meth in meths[_name]:
-                        sstr += self._format_method(_class, meth)
+                        sstr += self._format_method(meth)
                         sstr += "\n"
 
         if not sstr == "":
             sstr = """
-{0}## ------------------------------------------------------------------ ##
-{0}## Methods                                                            ##
-{0}## ------------------------------------------------------------------ ##
+{0}# ------------------------------------------------------------------ #
+{0}# Methods                                                            #
+{0}# ------------------------------------------------------------------ #
 
 """.format(self._get_tabulation()) + sstr
 
         return sstr
-
 
     def _format_members(self, _class):
         sstr = ""
@@ -197,7 +196,7 @@ class {1}: Documentation TODO
         # print _class.name,_class.members
         for encaps in ['public', 'private', 'protected']:
 
-            membs = _class.getMembers(encaps)
+            membs = _class.get_members(encaps)
             if len(membs) is not 0:
                 for dummy_name, memb in membs.iteritems():
                     if memb.static == 'static':
@@ -207,7 +206,7 @@ class {1}: Documentation TODO
 
         if sstr != "":
             sstr = """
-{0}## Members ---------------------- ##
+{0}# Members ---------------------- #
 
 """.format(self._get_tabulation()) + sstr
 
@@ -219,7 +218,7 @@ class {1}: Documentation TODO
         # print _class.name,_class.members
         for encaps in ['public', 'private', 'protected']:
 
-            membs = _class.getMembers(encaps)
+            membs = _class.get_members(encaps)
             if len(membs) is not 0:
                 for dummy_name, memb in membs.iteritems():
                     if not memb.static == 'static':
@@ -229,12 +228,11 @@ class {1}: Documentation TODO
 
         if sstr != "":
             sstr = """
-{0}## Members ---------------------- ##
+{0}# Members ---------------------- ##
 
 """.format(self._get_tabulation()) + sstr
 
         return sstr
-
 
     def _format_method(self, meth, pass_flag=True):
 
@@ -251,17 +249,18 @@ class {1}: Documentation TODO
             first_param = "cls"
 
         sstr += self._get_tabulation() + "def " + name + "("
-        sstr += ", ".join([first_param]+
+        sstr += ", ".join([first_param] +
                           [b for b, dummy_a in list(meth.args.iteritems())])
         sstr += "):\n"
 
         self._inc_tabulation()
 
         if meth.virtual == 'pure virtual':
-            sstr += self._get_tabulation() + "raise Exception('This is a pure virtual method')\n"
+            sstr += (self._get_tabulation() +
+                     "raise Exception('This is a pure virtual method')\n")
 
-
-        sstr += "{0}\"\"\" Documentation TODO \"\"\"\n".format(name)
+        sstr += ("{0}\"\"\"{1}: Documentation TODO \"\"\"\n"
+                 .format(self._get_tabulation(), name))
 
         if pass_flag:
             sstr += self._get_tabulation() + "pass\n"
@@ -277,7 +276,7 @@ class {1}: Documentation TODO
         if memb.encapsulation == 'protected':
             name = "_" + name
 
-        sstr = self._get_tabulation() + "#" + memb.type + " " + name + "\n"
+        sstr = self._get_tabulation() + "# " + memb.type + " " + name + "\n"
         sstr += self._get_tabulation() + "self." + name + " = None\n"
         return sstr
 
@@ -306,10 +305,13 @@ class {1}: Documentation TODO
 
 def main():
 
-    parser = argparse.ArgumentParser(description='CPP project producer for class representation')
-    parser.add_argument('--class_file', '-c', help='The class file to process', required=True)
+    parser = argparse.ArgumentParser(
+        description='CPP project producer for class representation')
+    parser.add_argument('--class_file', '-c',
+                        help='The class file to process', required=True)
     parser.add_argument('--output_dir', '-o',
-                        help='The directory where to put produced files', required=True)
+                        help='The directory where to put produced files',
+                        required=True)
 
     args = parser.parse_args()
     args = vars(args)
@@ -317,6 +319,7 @@ def main():
     dumper_class = ClassDumperPython(args['output_dir'])
 
     dumper_class.dump(args['class_file'])
+
 
 if __name__ == '__main__':
     main()
