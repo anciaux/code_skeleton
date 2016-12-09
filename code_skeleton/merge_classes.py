@@ -26,8 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################
 from __future__ import print_function
 import argparse
-from code_skeleton.class_dumper_classes    import ClassDumperClasses
-from code_skeleton.class_reader    import ClassReader
+from .class_dumper_classes    import ClassDumperClasses
+from .class_reader    import ClassReader
 ################################################################
 __author__ = "Guillaume Anciaux"
 __copyright__ = "Copyright EPFL"

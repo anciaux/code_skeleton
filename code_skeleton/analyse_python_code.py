@@ -72,7 +72,7 @@ def get_encapsulation(name):
 ################################################################
 def analyze_file(fnames, class_cache={}, **kwargs):
 
-    print fnames
+    print (fnames)
     modfile = fnames
     modname = os.path.basename(modfile)
     modname = os.path.splitext(modname)[0]
@@ -81,7 +81,7 @@ def analyze_file(fnames, class_cache={}, **kwargs):
     exclude_members = ['__module__', '__doc__']
     for k, v, in mymod.__dict__.iteritems():
         if inspect.isclass(v):
-            print k
+            print (k)
             class_desc = cd.ClassDescriptor(k, inheritance=None)
             for name, memb in inspect.getmembers(v):
                 #print name

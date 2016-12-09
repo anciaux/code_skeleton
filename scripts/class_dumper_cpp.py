@@ -250,7 +250,13 @@ int main(int argc, char ** argv){
                 if self.stage == 'header':
                     sstr += encaps + ':\n\n'
 
-                for dummy_name, memb in membs.iteritems():
+                try:
+                    _iter = membs.iteritems()
+                except Exception as ex:
+                    _iter = membs.items()
+
+
+                for dummy_name, memb in _iter:
                     sstr += self._format_member(memb)
                 sstr += "\n"
 
@@ -277,8 +283,14 @@ int main(int argc, char ** argv){
             if not meth.ret == "":
                 sstr += meth.ret + " "
             sstr += meth.name + "("
+
+            try:
+                _iter = meth.args.iteritems()
+            except Exception as ex:
+                _iter = meth.args.items()
+
             sstr += ", ".join([a + " " + b
-                               for b, a in list(meth.args.iteritems())])
+                               for b, a in list(_iter)])
             sstr += ")"
             if meth.virtual == 'pure virtual':
                 sstr += "=0"
@@ -290,8 +302,14 @@ int main(int argc, char ** argv){
                 return ""
 
             sstr += meth.ret + " " + _class.name + "::" + meth.name + "("
+
+            try:
+                _iter = meth.args.iteritems()
+            except Exception as ex:
+                _iter = meth.args.items()
+
             sstr += ", ".join([a + " " + b
-                               for b, a in list(meth.args.iteritems())])
+                               for b, a in list(_iter)])
             sstr += "){\n\n}\n\n"
             sstr += "\n"
             sstr += """

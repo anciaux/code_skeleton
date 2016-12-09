@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################
 from __future__ import print_function
 import re
-from code_skeleton.class_decriptor import ClassDescriptor
+from .class_decriptor import ClassDescriptor
 ################################################################
 __author__ = "Guillaume Anciaux"
 __copyright__ = "Copyright EPFL"
@@ -179,11 +179,3 @@ class ClassReader(object):
 
 ################################################################
 
-def main():
-    cls_reader = ClassReader()
-    classes = cls_reader.read('test.classes')
-    for _class in classes:
-        print (_class)
-
-if __name__ == '__main__':
-    main()

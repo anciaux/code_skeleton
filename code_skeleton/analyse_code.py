@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+from __future__ import print_function
 ################################################################
 import os
 import argparse
@@ -77,8 +78,8 @@ def analyzeFile(fnames, include_paths=None, cflags=None, class_cache={},
     try:
         decls = gccparser.parse(fnames, config)
     except Exception as ex:
-        print "Could not parse files '{0}'".format(fnames)
-        print ex
+        print ("Could not parse files '{0}'".format(fnames))
+        print (ex)
         raise
         # return class_cache
 
@@ -110,8 +111,8 @@ def analyzeFile(fnames, include_paths=None, cflags=None, class_cache={},
                 continue
 
 
-        print class_
-        print class_.name
+        print (class_)
+        print (class_.name)
         class_.name = clean_name(class_.name, **kwargs)
         inheritance = [clean_name(base.related_class.name, **kwargs) for base in class_.bases]
         #print inheritance
@@ -186,7 +187,7 @@ def analyze_files(dirname, extension_list=None, output=None, **kwargs):
     for filename in files:
         analyzeFile(filename, class_cache=read_classes, dec_dir=dirname, **kwargs)
 
-    print read_classes.keys()
+    print (read_classes.keys())
 
 
     if output is not None:
