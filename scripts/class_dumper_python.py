@@ -198,7 +198,12 @@ class {1}: Documentation TODO
 
             membs = _class.get_members(encaps)
             if len(membs) is not 0:
-                for dummy_name, memb in membs.iteritems():
+                try:
+                    _iter = membs.iteritems()
+                except Exception as ex:
+                    _iter = membs.items()
+
+                for dummy_name, memb in _iter:
                     if memb.static == 'static':
                         continue
                     sstr += self._format_member(memb)
@@ -220,7 +225,12 @@ class {1}: Documentation TODO
 
             membs = _class.get_members(encaps)
             if len(membs) is not 0:
-                for dummy_name, memb in membs.iteritems():
+                try:
+                    _iter = membs.iteritems()
+                except Exception as ex:
+                    _iter = membs.items()
+
+                for dummy_name, memb in _iter:
                     if not memb.static == 'static':
                         continue
                     sstr += self._format_static_member(memb)
@@ -249,6 +259,14 @@ class {1}: Documentation TODO
             first_param = "cls"
 
         sstr += self._get_tabulation() + "def " + name + "("
+
+
+        try:
+            _iter = meth.args.iteritems()
+        except Exception as ex:
+            _iter = meth.args.items()
+
+
         sstr += ", ".join([first_param] +
                           [b for dummy_a, b in list(meth.args.iteritems())])
         sstr += "):\n"

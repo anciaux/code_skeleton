@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -176,7 +176,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
                     _iter = membs.iteritems()
                 except Exception as ex:
                     _iter = membs.items()
-                    
+
                 for dummy_name, memb in _iter:
                     if sstr == "":
                         sstr = "|"
