@@ -250,7 +250,7 @@ class {1}: Documentation TODO
 
         sstr += self._get_tabulation() + "def " + name + "("
         sstr += ", ".join([first_param] +
-                          [b for b, dummy_a in list(meth.args.iteritems())])
+                          [b for dummy_a, b in list(meth.args.iteritems())])
         sstr += "):\n"
 
         self._inc_tabulation()

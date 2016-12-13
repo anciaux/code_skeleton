@@ -278,7 +278,7 @@ int main(int argc, char ** argv){
                 sstr += meth.ret + " "
             sstr += meth.name + "("
             sstr += ", ".join([a + " " + b
-                               for b, a in list(meth.args.iteritems())])
+                               for a, b in list(meth.args.iteritems())])
             sstr += ")"
             if meth.virtual == 'pure virtual':
                 sstr += "=0"
@@ -291,7 +291,7 @@ int main(int argc, char ** argv){
 
             sstr += meth.ret + " " + _class.name + "::" + meth.name + "("
             sstr += ", ".join([a + " " + b
-                               for b, a in list(meth.args.iteritems())])
+                               for a, b in list(meth.args.iteritems())])
             sstr += "){\n\n}\n\n"
             sstr += "\n"
             sstr += """

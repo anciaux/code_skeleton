@@ -5,6 +5,7 @@ class Animal
 
 class Cat(Animal)
   public virtual void scream();
+  public virtual void toto(std::string & toto);
 
 class Dog(Animal)
   public virtual void scream();
