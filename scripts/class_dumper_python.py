@@ -268,7 +268,7 @@ class {1}: Documentation TODO
 
 
         sstr += ", ".join([first_param] +
-                          [b for dummy_a, b in list(meth.args.iteritems())])
+                          [b for dummy_a, b in list(_iter)])
         sstr += "):\n"
 
         self._inc_tabulation()

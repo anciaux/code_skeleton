@@ -290,7 +290,7 @@ int main(int argc, char ** argv){
                 _iter = meth.args.items()
 
             sstr += ", ".join([a + " " + b
-                               for a, b in list(meth.args.iteritems())])
+                               for a, b in list(_iter)])
             sstr += ")"
             if meth.virtual == 'pure virtual':
                 sstr += "=0"
@@ -309,7 +309,7 @@ int main(int argc, char ** argv){
                 _iter = meth.args.items()
 
             sstr += ", ".join([a + " " + b
-                               for a, b in list(meth.args.iteritems())])
+                               for a, b in list(_iter)])
             sstr += "){\n\n}\n\n"
             sstr += "\n"
             sstr += """
