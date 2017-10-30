@@ -231,13 +231,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
     @classmethod
     def _format_method(cls, meth):
 
-        try:
-            _iter = meth.args.iteritems()
-        except Exception as ex:
-            _iter = meth.args.items()
-
-        arg_types = list(_iter)
-        arg_types = [_protect_str(a) for dummy_b, a in arg_types]
+        arg_types = [_protect_str(a) for a, dummy_b in meth.args]
         sstr = ""
         if meth.virtual == 'virtual' or\
            meth.virtual == 'pure virtual':

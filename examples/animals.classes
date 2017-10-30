@@ -1,11 +1,11 @@
 class Animal
   public pure virtual void scream();
-  public std::string getName(); 
+  public std::string & getName(); 
+  public void setName(std::string & toto);
   protected std::string name;
 
 class Cat(Animal)
   public virtual void scream();
-  public virtual void toto(std::string & toto);
 
 class Dog(Animal)
   public virtual void scream();

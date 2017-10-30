@@ -37,7 +37,8 @@ setup(name="code_skeleton",
       scripts=['scripts/class_dumper_dot.py',
                'scripts/class_dumper_cpp.py',
                'scripts/class_dumper_python.py'
-              ],
+               ],
+      test_suite="tests",
       license="""
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -49,14 +49,12 @@ class ClassReader(object):
         self.filename = None
         self.line_cpt = 0
 
-    def read(self, filename):
+    def read_from_buffer(self, _buffer):
+        "read the provided .classes file as a buffer"
 
-        " read the provided .classes file "
-
-        self.filename = filename
-        _file = open(self.filename, 'r')
+        lines = _buffer.split('\n')
         self.line_cpt = 0
-        for line in _file:
+        for line in lines:
             self.readline(line)
             self.line_cpt += 1
 
@@ -65,8 +63,14 @@ class ClassReader(object):
 
         return self.classes
 
-    def readline(self, line):
+    def read(self, filename):
+        "read the provided .classes file"
 
+        self.filename = filename
+        _file = open(self.filename, 'r')
+        return self.read_from_buffer(_file.read())
+
+    def readline(self, line):
         " read a single line "
 
         line = line.split('#')[0]
@@ -85,7 +89,7 @@ class ClassReader(object):
             else:
                 raise Exception('Unknown tag')
         except Exception as ex:
-            raise Exception(self.filename + ":{0}".format(self.line_cpt+1)
+            raise Exception(self.filename + ":{0}".format(self.line_cpt + 1)
                             + ":'" + line + "' : " + str(ex))
 
     def _is_new_class_tag(self, line):
@@ -178,4 +182,3 @@ class ClassReader(object):
         return False
 
 ################################################################
-

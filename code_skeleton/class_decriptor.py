@@ -35,6 +35,7 @@ __email__ = "guillaume.anciaux@epfl.ch"
 __status__ = "Beta"
 ################################################################
 
+
 class Typename(object):
 
     " Describes a typename "
@@ -45,26 +46,27 @@ class Typename(object):
 
 ################################################################
 
+
 class Method(object):
 
     " Describes a method "
+
     def __init__(self, name, args, ret, encapsulation,
                  virtual, static, const, comments):
 
         self.name = name
         self.virtual = virtual
         self.static = static
-        self.args = dict()
-        self.args.update(args)
+        self.args = list()
+        self.args += args
         self.ret = ret
         self.encapsulation = encapsulation
         if self.encapsulation == '':
             self.encapsulation = 'public'
         self.comments = comments
         self.const = const
-        #print "creating method {0}".format(name)
-        #print self.__dict__
-
+        # print "creating method {0}".format(name)
+        # print self.__dict__
 
     def __str__(self):
         sstr = self.encapsulation + " "
@@ -72,10 +74,7 @@ class Method(object):
             sstr += self.virtual + " "
 
         sstr += self.ret + " " + self.name + "("
-        try:
-            pairs = list(self.args.iteritems())
-        except Exception as ex:
-            pairs = list(self.args.items())
+        pairs = list(self.args)
         pairs = [b + " " + a for a, b in pairs]
         sstr += ", ".join(pairs)
         sstr += ")"
@@ -92,6 +91,7 @@ class Method(object):
         return hash(str(self))
 
 ################################################################
+
 
 class Member(object):
 
@@ -113,6 +113,7 @@ class Member(object):
 
 ################################################################
 
+
 class ClassDescriptor(object):
 
     " Describe a class "
@@ -120,47 +121,42 @@ class ClassDescriptor(object):
     def __init__(self, name, inheritance=None):
         self.name = name
         self.inheritance = inheritance
-        self.members = {'private':{}, 'public':{}, 'protected':{}}
-        self.methods = {'private':{}, 'public':{}, 'protected':{}}
-        self.types = {'private':{}, 'public':{}, 'protected':{}}
+        self.members = {'private': {}, 'public': {}, 'protected': {}}
+        self.methods = {'private': {}, 'public': {}, 'protected': {}}
+        self.types = {'private': {}, 'public': {}, 'protected': {}}
 
     def add_method(self, name, args, ret, encapsulation,
                    virtual, static, const, comments):
-
         " append a method to the class "
 
-        new_method = Method(name, args, ret, encapsulation, virtual, static, const, comments)
+        new_method = Method(name, args, ret, encapsulation,
+                            virtual, static, const, comments)
         if name not in self.methods[encapsulation]:
             self.methods[encapsulation][name] = set()
         self.methods[encapsulation][name].add(new_method)
 
     def add_member(self, name, _type, encapsulation, static, comments):
-
         " append a member to the class "
 
         new_member = Member(name, _type, encapsulation, static, comments)
         self.members[encapsulation][name] = new_member
 
     def add_type(self, name, encapsulation):
-
         " add a type to the list of typenames "
 
         new_type = Typename(name, encapsulation)
         self.types[encapsulation][name] = new_type
 
     def get_members(self, encapsulation=None):
-
         " return the members "
 
         return self.members[encapsulation]
 
     def get_types(self, encapsulation=None):
-
         " return the typenames "
         return self.types[encapsulation]
 
     def get_methods(self, encapsulation=None):
-
         " return the methods "
         return self.methods[encapsulation]
 
@@ -203,4 +199,3 @@ class ClassDescriptor(object):
         return sstr
 
 ################################################################
-
