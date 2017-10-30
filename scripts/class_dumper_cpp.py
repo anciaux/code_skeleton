@@ -284,11 +284,7 @@ int main(int argc, char ** argv){
                 sstr += meth.ret + " "
             sstr += meth.name + "("
 
-            try:
-                _iter = meth.args.iteritems()
-            except Exception as ex:
-                _iter = meth.args.items()
-
+            _iter = meth.args
             sstr += ", ".join([a + " " + b
                                for a, b in list(_iter)])
             sstr += ")"
@@ -303,10 +299,7 @@ int main(int argc, char ** argv){
 
             sstr += meth.ret + " " + _class.name + "::" + meth.name + "("
 
-            try:
-                _iter = meth.args.iteritems()
-            except Exception as ex:
-                _iter = meth.args.items()
+            _iter = meth.args
 
             sstr += ", ".join([a + " " + b
                                for a, b in list(_iter)])

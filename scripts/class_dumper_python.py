@@ -261,11 +261,7 @@ class {1}: Documentation TODO
         sstr += self._get_tabulation() + "def " + name + "("
 
 
-        try:
-            _iter = meth.args.iteritems()
-        except Exception as ex:
-            _iter = meth.args.items()
-
+        _iter = meth.args
 
         sstr += ", ".join([first_param] +
                           [b for dummy_a, b in list(_iter)])
