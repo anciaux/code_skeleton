@@ -83,7 +83,6 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         fout.close()
 
     def dump_class(self, _class, _file):
-
         " dumps a class into the provided file "
 
         sstr = self._format_class_declaration(_class)
@@ -152,7 +151,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
             meths_names = set(meths.keys()) - set([_class.name, '~'
                                                    + _class.name])
             meths_names = list(meths_names)
-            if len(meths_names) is not 0:
+            if len(meths_names) != 0:
 
                 for _name in meths_names:
                     for meth in meths[_name]:
@@ -170,7 +169,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         for encaps in ['public', 'private', 'protected']:
 
             membs = _class.get_members(encaps)
-            if len(membs) is not 0:
+            if len(membs) != 0:
 
                 try:
                     _iter = membs.iteritems()
@@ -191,7 +190,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
         for encaps in ['public', 'private', 'protected']:
 
             membs = _class.get_members(encaps)
-            if len(membs) is not 0:
+            if len(membs) != 0:
 
                 try:
                     _iter = membs.iteritems()
@@ -205,7 +204,8 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 
         sstr = ""
         for comp in composition_set:
-            sstr += '"{0}" '.format(comp) + " -> " + '"{0}" '.format(_class.name)
+            sstr += '"{0}" '.format(comp) + " -> " + \
+                '"{0}" '.format(_class.name)
             sstr += ('[style="dashed",color="midnightblue",'
                      'fontname="Helvetica",arrowtail="odiamond",'
                      'fontsize="10",dir="back"];\n')
@@ -277,7 +277,7 @@ def main():
     args = vars(args)
     if args["output"] is None:
         args['output'] = os.path.splitext(args['class_file'])[0] +\
-                         "." + args['format']
+            "." + args['format']
 
     if args["class_filter"] is not None:
         args["class_filter"] = args["class_filter"].split(',')
