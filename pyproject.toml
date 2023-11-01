@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "code-skeleton"
-version = "0.1.0"
+version = "0.0.1"
 description = "Code classes solution and Code generator"
 authors = ["Guillaume Anciaux <guillaume.anciaux@epfl.ch>"]
 license = "GPLv3"
@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "code_skeleton"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
 
 
 [build-system]
