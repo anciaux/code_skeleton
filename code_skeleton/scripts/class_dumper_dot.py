@@ -257,7 +257,10 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 ################################################################
 
 
-def main(argv=sys.argv[1:]):
+def main(argv=None):
+
+    if argv is None:
+        argv = sys.argv[1:]
 
     parser = argparse.ArgumentParser(
         description='DOT graph producer for class representation')
@@ -274,7 +277,7 @@ def main(argv=sys.argv[1:]):
     parser.add_argument('--class_filter', type=str,
                         help='The classes to output')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     args = vars(args)
     if args["output"] is None:
         args['output'] = os.path.splitext(args['class_file'])[0] +\

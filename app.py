@@ -35,10 +35,10 @@ def generate_class_diag(collab=False, inheritance=True):
         if not inheritance:
             opt += ' --inheritance_no'
         cdd.main(
-            f'class_dumper_dot {opt} -c {fname} -f svg -o {fname}.svg'.split())
+            f'{opt} -c {fname} -f svg -o {fname}.svg'.split())
 
         cdd.main(
-            f'class_dumper_dot {opt} -c {fname} -f pdf -o {fname}.pdf'.split())
+            f'{opt} -c {fname} -f pdf -o {fname}.pdf'.split())
 
         with open(f'{fname}.svg', 'rb') as f:
             b64_svg = base64.b64encode(f.read()).decode("utf-8")
