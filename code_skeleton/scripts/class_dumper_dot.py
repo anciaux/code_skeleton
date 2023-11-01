@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import argparse
 import subprocess
 import os
+import sys
 from code_skeleton.class_dumper import ClassDumper
 ################################################################
 __author__ = "Guillaume Anciaux"
@@ -256,7 +257,7 @@ node [fontname="Helvetica",fontsize="10",shape=record];
 ################################################################
 
 
-def main():
+def main(argv=sys.argv[1:]):
 
     parser = argparse.ArgumentParser(
         description='DOT graph producer for class representation')

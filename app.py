@@ -1,8 +1,8 @@
 import streamlit as st
-import subprocess
 import base64
 import tempfile
 import os
+import code_skeleton.scripts.class_dumper_dot as cdd
 
 st.set_page_config(layout="wide")
 
@@ -34,33 +34,11 @@ def generate_class_diag(collab=False, inheritance=True):
             opt += ' --collaboration_no'
         if not inheritance:
             opt += ' --inheritance_no'
-        p = subprocess.run(
-            f'class_dumper_dot {opt} -c {fname} -f svg -o {fname}.svg',
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        try:
-            p.check_returncode()
-        except subprocess.CalledProcessError as e:
-            st.error("failed launching class_dumper_dot")
-            if e.stderr:
-                st.error(f"{e.stderr.decode()}")
-                return
+        cdd.main(
+            f'class_dumper_dot {opt} -c {fname} -f svg -o {fname}.svg'.split())
 
-        p = subprocess.run(
-            f'class_dumper_dot {opt} -c {fname} -f pdf -o {fname}.pdf',
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        try:
-            p.check_returncode()
-        except subprocess.CalledProcessError as e:
-            st.error("failed launching class_dumper_dot")
-            if e.stderr:
-                st.error(f"{e.stderr.decode()}")
-                return
+        cdd.main(
+            f'class_dumper_dot {opt} -c {fname} -f pdf -o {fname}.pdf'.split())
 
         with open(f'{fname}.svg', 'rb') as f:
             b64_svg = base64.b64encode(f.read()).decode("utf-8")
