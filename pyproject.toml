@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "code-skeleton"
+version = "0.1.0"
+description = "Code classes solution and Code generator"
+authors = ["Guillaume Anciaux <guillaume.anciaux@epfl.ch>"]
+license = "GPLv3"
+readme = "README.md"
+packages = [{include = "code_skeleton"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+
+[tool.poetry.scripts]
+class_dumper_dot = "code_skeleton.scripts.class_dumper_dot:main"

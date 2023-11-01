@@ -35,7 +35,7 @@ def generate_class_diag(collab=False, inheritance=True):
         if not inheritance:
             opt += ' --inheritance_no'
         p = subprocess.run(
-            f'class_dumper_dot.py {opt} -c {fname} -f svg -o {fname}.svg',
+            f'class_dumper_dot {opt} -c {fname} -f svg -o {fname}.svg',
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -49,7 +49,7 @@ def generate_class_diag(collab=False, inheritance=True):
                 return
 
         p = subprocess.run(
-            f'class_dumper_dot.py {opt} -c {fname} -f pdf -o {fname}.pdf',
+            f'class_dumper_dot {opt} -c {fname} -f pdf -o {fname}.pdf',
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE

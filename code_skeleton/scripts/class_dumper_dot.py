@@ -300,7 +300,3 @@ def main():
     option_output = ['-o', args['output']]
     option_input = [dot_file]
     subprocess.call(exe+option_format+option_output+option_input)
-
-
-if __name__ == '__main__':
-    main()
