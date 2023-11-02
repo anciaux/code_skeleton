@@ -3,11 +3,25 @@ import base64
 import tempfile
 import os
 import code_skeleton.scripts.class_dumper_dot as cdd
+import extra_streamlit_components as stx
 
 st.set_page_config(layout="wide")
 
-st.markdown('# Class hierarchy UML generator')
-text = st.text_area('Insert your class hierarchy here', value='''
+
+cookie_manager = stx.CookieManager()
+cookies = cookie_manager.get_all()
+should_not_update_cookie = False
+
+if not (cookies):
+    should_not_update_cookie = True
+
+clear = st.button('Clear cache', use_container_width=True)
+
+# if not should_not_update_cookie:
+#    st.write(cookies)
+
+if 'code_skeleton' not in cookies or clear:
+    class_desc = """
 class Animal
   public pure virtual void scream();
   public std::string & getName(); 
@@ -19,7 +33,16 @@ class Cat(Animal)
 
 class Dog(Animal)
   public virtual void scream();
-''', height=500)
+"""
+else:
+    class_desc = cookie_manager.get('code_skeleton')
+
+st.markdown('# Class hierarchy UML generator')
+text = st.text_area('Insert your class hierarchy here',
+                    value=class_desc, height=500, key='class_desc')
+
+if not should_not_update_cookie or clear:
+    cookie_manager.set('code_skeleton', text)
 
 
 def generate_class_diag(collab=False, inheritance=True):

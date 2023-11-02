@@ -8,7 +8,8 @@ readme = "README.md"
 packages = [{include = "code_skeleton"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
+extra-streamlit-components = "^0.1.60"
 
 
 [build-system]
