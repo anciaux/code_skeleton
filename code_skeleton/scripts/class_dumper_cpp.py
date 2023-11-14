@@ -37,6 +37,7 @@ __email__ = "guillaume.anciaux@epfl.ch"
 __status__ = "Beta"
 ################################################################
 
+
 class ClassDumperCPP(ClassDumper):
 
     " Produces a C++ project ready to use with CMake/Makfiles "
@@ -255,7 +256,6 @@ int main(int argc, char ** argv){
                 except Exception as ex:
                     _iter = membs.items()
 
-
                 for dummy_name, memb in _iter:
                     sstr += self._format_member(memb)
                 sstr += "\n"
@@ -323,7 +323,10 @@ int main(int argc, char ** argv){
 
 ################################################################
 
-def main():
+def main(argv=None):
+    import sys
+    if argv is None:
+        argv = sys.argv[1:]
 
     parser = argparse.ArgumentParser(description=('CPP project producer for '
                                                   'class representation'))
@@ -333,7 +336,7 @@ def main():
                         help='The directory where to put produced files',
                         required=True)
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     args = vars(args)
     os.makedirs(args['output_dir'])
     dumper_class = ClassDumperCPP(args['output_dir'])

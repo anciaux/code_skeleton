@@ -3,6 +3,7 @@ import base64
 import tempfile
 import os
 import code_skeleton.scripts.class_dumper_dot as cdd
+import code_skeleton.scripts.class_dumper_cpp as cdcpp
 import extra_streamlit_components as stx
 
 st.set_page_config(layout="wide")
@@ -81,7 +82,7 @@ collab = col2.checkbox("Show Collaborations", value=False)
 inheritance = col1.checkbox("Show Inheritance", value=True)
 
 svg, pdf, b64_svg = generate_class_diag(collab, inheritance)
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 
 col1.download_button('Download as PDF', data=pdf,
                      file_name='uml.pdf', use_container_width=True)
@@ -89,6 +90,25 @@ col2.download_button('Download as SVG', data=svg,
                      file_name='uml.svg', use_container_width=True)
 col3.download_button('Download as classes', data=text,
                      file_name='uml.classes', use_container_width=True)
+with col4:
+    gen = st.button('Generate C++ project',
+                    use_container_width=True)
+    if gen:
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            f.write(text)
+            f.flush()
+
+            d = f.name + '_dir_'
+            _zip = f.name + '.zip'
+            cdcpp.main(
+                f'-c {f.name} -o {d}'.split())
+            import shutil
+            shutil.make_archive(f.name, 'zip', d)
+            with open(_zip, 'rb') as f:
+                _zip = f.read()
+            st.download_button('Download project as zip file', data=_zip,
+                               file_name='project.zip', use_container_width=True)
+
 
 zoom = st.slider("Zoom level", value=50, min_value=1, max_value=100)
 
