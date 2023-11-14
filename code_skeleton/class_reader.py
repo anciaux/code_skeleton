@@ -168,11 +168,14 @@ class ClassReader(object):
             args = match.group(6).strip().split(',')
             const = match.group(7).strip()
             comments = match.group(8).strip()
-            args = [list(e.strip().split(' ')) for e in args]
+            args = [list(e.strip().split(' '))
+                    for e in args if e.strip() != '']
             temp_args = []
             for arg in args:
                 if len(arg) >= 2:
                     temp_args.append(tuple([" ".join(arg[:-1]), arg[-1]]))
+                elif len(arg) == 1:
+                    temp_args.append((" ".join(arg), 'unnamed'))
             args = temp_args
             args = [e for e in args if not e[0] == '']
             self.current_class.add_method(name, args, ret,
