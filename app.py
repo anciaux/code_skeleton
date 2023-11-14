@@ -26,7 +26,7 @@ if 'code_skeleton' not in cookies or clear:
 class Animal
   public pure virtual void scream();
   public std::string & getName(); 
-  public void setName(std::string & toto);
+  public void setName(std::string & name);
   protected std::string name;
 
 class Cat(Animal)
